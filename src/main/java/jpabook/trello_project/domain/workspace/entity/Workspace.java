@@ -3,6 +3,7 @@ package jpabook.trello_project.domain.workspace.entity;
 import jakarta.persistence.*;
 import jpabook.trello_project.domain.board.entity.Board;
 import jpabook.trello_project.domain.user.entity.User;
+import jpabook.trello_project.domain.workspace.dto.request.WorkspaceRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,5 +33,17 @@ public class Workspace {
         this.user = user;
         this.title = title;
         this.info = info;
+    }
+
+    public Workspace update(WorkspaceRequestDto workspaceRequestDto) {
+        if (workspaceRequestDto.getTitle() != null) {
+            this.title = workspaceRequestDto.getTitle();
+        }
+
+        if (workspaceRequestDto.getInfo() != null) {
+            this.info = workspaceRequestDto.getInfo();
+        }
+
+        return this;
     }
 }

@@ -6,6 +6,7 @@ import jpabook.trello_project.domain.workspace.entity.Workspace;
 import jpabook.trello_project.domain.workspace_member.enums.WorkRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.parameters.P;
 
 @Getter
 @Entity
@@ -27,5 +28,11 @@ public class WorkspaceMember {
 
     @Enumerated(EnumType.STRING)
     private WorkRole workRole;
+
+    public WorkspaceMember(User user, Workspace workspace, WorkRole workRole) {
+        this.user = user;
+        this.workspace = workspace;
+        this.workRole = workRole;
+    }
 
 }

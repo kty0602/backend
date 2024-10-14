@@ -20,6 +20,7 @@ public class Lists {
     private Board board;
 
     private String title;
+    @Column(name = "list_order")
     private long order;
 
     public Lists(Board board, String title, long order) {
