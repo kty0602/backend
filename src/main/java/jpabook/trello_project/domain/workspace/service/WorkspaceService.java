@@ -3,6 +3,7 @@ package jpabook.trello_project.domain.workspace.service;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.AccessDeniedException;
 import jpabook.trello_project.domain.user.entity.User;
+import jpabook.trello_project.domain.user.repository.UserRepository;
 import jpabook.trello_project.domain.workspace.dto.request.WorkspaceRequestDto;
 import jpabook.trello_project.domain.workspace.dto.response.WorkspaceResponseDto;
 import jpabook.trello_project.domain.workspace.entity.Workspace;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class WorkspaceService {
 
-    // private final UserRepository userRepository;
+    private final UserRepository userRepository;
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
@@ -41,9 +42,8 @@ public class WorkspaceService {
             throw new AccessDeniedException("멤버를 초대할 권한이 없습니다.");
         }
 
-        User newMember = new User();
-//                userRepository.findByEmail(email)
-//                .orElseThrow(() -> new AccessDeniedException("초대할 멤버를 찾을 수 없습니다."));
+        User newMember = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AccessDeniedException("초대할 멤버를 찾을 수 없습니다."));
 
         WorkspaceMember newWorkspaceMember = new WorkspaceMember(newMember, workspace, WorkRole.ROLE_READONLY);
         WorkspaceMember savedWorkspaceMember = workspaceMemberRepository.save(newWorkspaceMember);
@@ -55,9 +55,8 @@ public class WorkspaceService {
     public Page<WorkspaceResponseDto> getWorkspaces(int page, int size, AuthUser authUser) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        User user = new User();
-//                userRepository.findById(authUser.getId())
-//                        .orElseThrow(()-> new AccessDeniedException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(authUser.getId())
+                        .orElseThrow(()-> new AccessDeniedException("사용자를 찾을 수 없습니다."));
 
         Page<WorkspaceMember> workspaceMembers = workspaceMemberRepository.findByUser(user, pageable);
 

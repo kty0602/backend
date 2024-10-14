@@ -23,7 +23,13 @@ public class User {
     private UserRole userRole;
     private boolean isDeleted = false;
 
-    private User(Long id, String name, String email, UserRole userRole) {
+    public User(String email, String name, String password, UserRole userRole) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.userRole = userRole;
+    }
+    public User(Long id, String name, String email, UserRole userRole) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -32,5 +38,13 @@ public class User {
 
     public static User fromAuthUser(AuthUser authUser) {
         return new User(authUser.getId(), authUser.getEmail(), authUser.getName(), UserRole.valueOf(authUser.getAuthorities().iterator().next().getAuthority()));
+    }
+
+    public void withdraw() {
+        this.isDeleted = true;
+        // 이메일을 제외한 모든 데이터 삭제
+        this.name = null;
+        this.password = null;
+        this.userRole = null;
     }
 }

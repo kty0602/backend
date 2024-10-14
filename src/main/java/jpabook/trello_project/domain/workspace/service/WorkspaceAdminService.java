@@ -3,6 +3,7 @@ package jpabook.trello_project.domain.workspace.service;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.AccessDeniedException;
 import jpabook.trello_project.domain.user.entity.User;
+import jpabook.trello_project.domain.user.repository.UserRepository;
 import jpabook.trello_project.domain.workspace.dto.request.WorkspaceRequestDto;
 import jpabook.trello_project.domain.workspace.dto.response.WorkspaceResponseDto;
 import jpabook.trello_project.domain.workspace.entity.Workspace;
@@ -16,12 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class WorkspaceAdminService {
 
-    // private final UserRepository userRepository;
+    private final UserRepository userRepository;
     private final WorkspaceRepository workspaceRepository;
     public WorkspaceResponseDto saveWorkspace(AuthUser authUser, WorkspaceRequestDto workspaceRequestDto) {
-        User user = new User();
-//                userRepository.findById(authUser.getId())
-//                        .orElseThrow(()-> new AccessDeniedException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(authUser.getId())
+                        .orElseThrow(()-> new AccessDeniedException("사용자를 찾을 수 없습니다."));
 
 
         Workspace newWorkspace = new Workspace(
