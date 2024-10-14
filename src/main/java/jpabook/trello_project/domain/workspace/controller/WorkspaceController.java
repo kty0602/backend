@@ -57,6 +57,13 @@ public class WorkspaceController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, responseDto));
     }
 
+    /**
+     * 워크스페이스 정보 수정
+     * @param authUser 사용자
+     * @param workId 워크스페이스 아이디
+     * @param workspaceRequestDto 워크스페이스 requestDto
+     * @return ResponseEntity<ResponseDto<WorkspaceResponseDto>>
+     */
     @PatchMapping("/{workId}")
     public ResponseEntity<ResponseDto<WorkspaceResponseDto>> updateWorkspace(
             @AuthenticationPrincipal AuthUser authUser,
@@ -67,6 +74,12 @@ public class WorkspaceController {
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, responseDto));
     }
 
+    /**
+     * 워크스페이스 삭제
+     * @param authUser 사용자
+     * @param workId 워크스페이스 아이디
+     * @return ResponseEntity<ResponseDto<String>>
+     */
     @DeleteMapping("/{workId}")
     public ResponseEntity<ResponseDto<String>> deleteWorkspace(
             @AuthenticationPrincipal AuthUser authUser,
