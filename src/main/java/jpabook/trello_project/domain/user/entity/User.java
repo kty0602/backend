@@ -28,4 +28,12 @@ public class User {
         this.password = password;
         this.userRole = userRole;
     }
+
+    public void withdraw() {
+        this.isDeleted = true;
+        // 이메일을 제외한 모든 데이터 삭제
+        this.name = null;
+        this.password = null;
+        this.userRole = null;
+    }
 }

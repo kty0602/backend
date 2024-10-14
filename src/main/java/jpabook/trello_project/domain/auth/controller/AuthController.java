@@ -9,6 +9,7 @@ import jpabook.trello_project.domain.auth.service.AuthService;
 import jpabook.trello_project.domain.common.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +21,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth/signup")
-    public ResponseDto<SignupResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
-        return ResponseDto.of(HttpStatus.OK, authService.signup(signupRequest));
+    public ResponseEntity<ResponseDto<SignupResponse>> signup(@Valid @RequestBody SignupRequest signupRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseDto.of(HttpStatus.CREATED, authService.signup(signupRequest)));
     }
 
     @PostMapping("/auth/signin")

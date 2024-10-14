@@ -7,7 +7,6 @@ import jpabook.trello_project.domain.auth.dto.response.SigninResponse;
 import jpabook.trello_project.domain.auth.dto.response.SignupResponse;
 import jpabook.trello_project.domain.common.exceptions.ApiException;
 import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
-import jpabook.trello_project.domain.common.exceptions.InvalidRequestException;
 import jpabook.trello_project.domain.user.entity.User;
 import jpabook.trello_project.domain.user.enums.UserRole;
 import jpabook.trello_project.domain.user.repository.UserRepository;
@@ -49,12 +48,14 @@ public class AuthService {
     }
 
     public SigninResponse signin(SigninRequest signinRequest) {
+        // 로그인 실패시 401 반환
         User user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(
-                () -> new ApiException(ErrorStatus._NOT_FOUND_USER));
+                () -> new ApiException(ErrorStatus._UNAUTHORIZED_SIGNIN));
 
-        // 로그인 시 이메일과 비밀번호가 일치하지 않을 경우 401을 반환합니다.
+        if (user.isDeleted()) throw new ApiException(ErrorStatus._BAD_REQUEST_USER);
+
         if (!passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
-            throw new ApiException(ErrorStatus._BAD_REQUEST_PASSWORD);
+            throw new ApiException(ErrorStatus._UNAUTHORIZED_SIGNIN);
         }
 
         String bearerToken = jwtUtil.createToken(user.getId(), user.getEmail(), user.getUserRole());
