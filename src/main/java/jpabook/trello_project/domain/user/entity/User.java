@@ -21,4 +21,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
     private boolean isDeleted = false;
+
+    public User(String email, String name, String password, UserRole userRole) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.userRole = userRole;
+    }
 }
