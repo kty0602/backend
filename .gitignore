@@ -37,6 +37,3 @@ out/
 .vscode/
 
 /src/main/generated/
-
-# Exclude application.properties
-**/application.properties
