@@ -36,10 +36,12 @@ public class Card {
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Reply> replyList = new ArrayList<>();
 
+    // lists 집어넣는거 아직 추가 안됨
     public Card(CreateCardRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.info = requestDto.getInfo();
         this.due = requestDto.getDue();
+        // this.list = list;
         this.attachmentList = new ArrayList<>();
         this.replyList = new ArrayList<>();
     }
