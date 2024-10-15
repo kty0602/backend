@@ -31,10 +31,10 @@ public class Reply {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 유저 추가해야함
-    public Reply(CreateReplyRequestDto requestDto, Card card) {
+    public Reply(CreateReplyRequestDto requestDto, Card card, User user) {
         this.content = requestDto.getContent();
         this.card = card;
+        this.user = user;
     }
 
     public void changeContent(String content) { this.content = content; }
