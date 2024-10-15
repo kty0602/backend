@@ -9,10 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface   WorkspaceMemberRepository extends JpaRepository<WorkspaceMember, Long> {
-
+public interface WorkspaceMemberRepository extends JpaRepository<WorkspaceMember, Long> {
     Page<WorkspaceMember> findByUser(User user, Pageable pageable);
     Optional<WorkspaceMember> findByUserAndWorkspace(User user, Workspace workspace);
-    Optional<WorkspaceMember> findByUser(User user);
-    boolean existsByUser(User user);
+    boolean existsByUserAndWorkspace(User user, Workspace workspace);
 }

@@ -37,10 +37,10 @@ public class WorkspaceMemberService {
         User user = userService.findById(userId);
 
         // 요청을 보낸 어드민이 워크스페이스의 멤버가 아닌 경우
-        if (!workspaceMemberRepository.existsByUser(adminUser)) throw new ApiException(ErrorStatus._UNAUTHORIZED_USER);
+        if (!workspaceMemberRepository.existsByUserAndWorkspace(adminUser, workspace)) throw new ApiException(ErrorStatus._UNAUTHORIZED_USER);
 
         // 해당 유저가 워크스페이스의 멤버가 아닌 경우 (_NOT_FOUND_MEMBER)
-        WorkspaceMember workspaceMember = workspaceMemberRepository.findByUser(user)
+        WorkspaceMember workspaceMember = workspaceMemberRepository.findByUserAndWorkspace(user, workspace)
                 .orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_MEMBER));
 
         workspaceMember.changeRole(WorkRole.of(changeMemberRoleRequest.getWorkRole()));
