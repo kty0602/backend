@@ -25,13 +25,7 @@ public class UserService {
             throw new ApiException(ErrorStatus._UNAUTHORIZED);
         }
 
-        User user = userRepository.findByEmail(authUser.getEmail()).orElseThrow(
-                () -> new ApiException(ErrorStatus._NOT_FOUND_USER));
-
-        // 이미 탈퇴한 회원
-        if (user.isDeleted()) {
-            throw new ApiException(ErrorStatus._BAD_REQUEST_USER);
-        }
+        User user = findByEmail(authUser.getEmail());
 
         // 비밀번호 불일치
         if (!passwordEncoder.matches(withdrawRequest.getPassword(), user.getPassword())) {
@@ -39,5 +33,27 @@ public class UserService {
         }
 
         user.withdraw();
+    }
+
+    public User findByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new ApiException(ErrorStatus._NOT_FOUND_USER));
+
+        if (user.isDeleted()) {
+            throw new ApiException(ErrorStatus._BAD_REQUEST_USER);
+        }
+
+        return user;
+    }
+
+    public User findById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new ApiException(ErrorStatus._NOT_FOUND_USER));
+
+        if (user.isDeleted()) {
+            throw new ApiException(ErrorStatus._BAD_REQUEST_USER);
+        }
+
+        return user;
     }
 }
