@@ -28,4 +28,7 @@ public class WorkspaceMember {
     @Enumerated(EnumType.STRING)
     private WorkRole workRole;
 
+    public void changeRole(WorkRole workRole) {
+        this.workRole = workRole;
+    }
 }
