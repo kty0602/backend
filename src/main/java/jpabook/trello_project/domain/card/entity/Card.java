@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jpabook.trello_project.domain.attachment.entity.Attachment;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
 import jpabook.trello_project.domain.lists.entity.Lists;
+import jpabook.trello_project.domain.manager.entity.Manager;
 import jpabook.trello_project.domain.reply.entity.Reply;
 import lombok.*;
 
@@ -35,6 +36,8 @@ public class Card {
     private List<Attachment> attachmentList = new ArrayList<>();
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Reply> replyList = new ArrayList<>();
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Manager> managers = new ArrayList<>();
 
     // lists 집어넣는거 아직 추가 안됨
     public Card(CreateCardRequestDto requestDto) {
@@ -44,6 +47,7 @@ public class Card {
         // this.list = list;
         this.attachmentList = new ArrayList<>();
         this.replyList = new ArrayList<>();
+        this.managers = new ArrayList<>();
     }
 
     public void changeTitle(String title) { this.title = title; }
