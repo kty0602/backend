@@ -2,11 +2,19 @@ package jpabook.trello_project.domain.board.service;
 
 import jpabook.trello_project.domain.board.dto.request.BoardRequestDto;
 import jpabook.trello_project.domain.board.dto.response.BoardResponseDto;
+import jpabook.trello_project.domain.board.dto.response.OneBoardResponseDto;
 import jpabook.trello_project.domain.board.entity.Board;
 import jpabook.trello_project.domain.board.repository.BoardRepository;
+import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
+import jpabook.trello_project.domain.card.entity.Card;
+import jpabook.trello_project.domain.card.repository.CardRepository;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.AccessDeniedException;
 import jpabook.trello_project.domain.common.exceptions.InvalidTitleException;
+import jpabook.trello_project.domain.lists.dto.ListCardResponseDto;
+import jpabook.trello_project.domain.lists.dto.ListResponseDto;
+import jpabook.trello_project.domain.lists.entity.Lists;
+import jpabook.trello_project.domain.lists.repository.ListRepository;
 import jpabook.trello_project.domain.user.entity.User;
 import jpabook.trello_project.domain.workspace.entity.Workspace;
 import jpabook.trello_project.domain.workspace.repository.WorkspaceRepository;
@@ -20,6 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,6 +39,8 @@ public class BoardService {
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final BoardRepository boardRepository;
+    private final ListRepository listRepository;
+    private final CardRepository cardRepository;
 
     @Transactional
     public BoardResponseDto createBoard(AuthUser authUser, Long workId, BoardRequestDto boardRequestDto) {
@@ -54,8 +67,7 @@ public class BoardService {
     }
 
 
-    // 리스트랑 카드도 보이게 고치기
-    public BoardResponseDto getOneBoard(AuthUser authUser, Long workId, Long boardId) {
+    public OneBoardResponseDto getOneBoard(AuthUser authUser, Long workId, Long boardId) {
         Workspace workspace = workspaceRepository.findById(workId)
                 .orElseThrow(() -> new AccessDeniedException("워크스페이스를 찾을 수 없습니다."));
 
@@ -65,7 +77,19 @@ public class BoardService {
         Board board = boardRepository.findByIdAndWorkspace(boardId, workspaceMember.getWorkspace())
                 .orElseThrow(() -> new AccessDeniedException("보드를 찾을 수 없습니다."));
 
-        return new BoardResponseDto(board);
+        List<Lists> newListList = listRepository.findByBoard(board);
+
+        List<ListCardResponseDto> listCardResponseDtos = newListList.stream()
+                .map(list -> {
+                    List<Card> cards = cardRepository.findByList(list);
+                    List<CardResponseDto> cardResponseDtos = cards.stream()
+                            .map(CardResponseDto::new)
+                            .collect(Collectors.toList());
+                    return new ListCardResponseDto(list, cardResponseDtos);
+                })
+                .collect(Collectors.toList());
+
+        return new OneBoardResponseDto(board, listCardResponseDtos);
     }
 
 
