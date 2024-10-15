@@ -47,7 +47,15 @@ public class AttachmentService {
 
         List<AttachmentResponseDto> responseDtos = new ArrayList<>();
 
+        List<String> supportedFileTypes = List.of("image/jpeg", "image/png", "application/pdf", "text/csv");
+
         for (MultipartFile file : files) {
+
+            // 파일 형식 검사
+            if (!supportedFileTypes.contains(file.getContentType())) {
+                throw new InvalidRequestException("지원되지 않는 파일 형식입니다: " + file.getContentType());
+            }
+
             String fileName = file.getOriginalFilename();
             String fileUrl = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
 
