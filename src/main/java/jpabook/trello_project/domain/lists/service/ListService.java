@@ -30,7 +30,7 @@ public class ListService {
     private final WorkspaceMemberRepository workspaceMemberRepository;  // 교체
 
     private void checkIfValidUser(AuthUser user, Long workId) {
-        WorkspaceMember wm = workspaceMemberRepository.findByUserIdAndWorkId(user.getId(), workId)
+        WorkspaceMember wm = workspaceMemberRepository.findByUserIdAndWorkspaceId(user.getId(), workId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._INVALID_WORK_ROLE));
         if(wm.getWorkRole() == WorkRole.ROLE_READONLY)
             throw new ApiException(ErrorStatus._INVALID_WORK_ROLE);

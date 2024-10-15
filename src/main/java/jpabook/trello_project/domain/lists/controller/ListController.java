@@ -23,6 +23,7 @@ public class ListController {
                                                                      @PathVariable("boardId") Long boardId,
                                                                      @RequestBody ListSaveRequestDto saveRequestDto) {
         AuthUser user = new AuthUser(1L, "email@email.com", UserRole.ROLE_USER);    // !!임의값!! (@AuthUser 사용)
+
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.of(201, listService.saveList(user, workId, boardId, saveRequestDto)));
     }
 
