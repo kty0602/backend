@@ -2,6 +2,7 @@ package jpabook.trello_project.domain.manager.entity;
 
 import jakarta.persistence.*;
 import jpabook.trello_project.domain.card.entity.Card;
+import jpabook.trello_project.domain.manager.dto.request.ManagerRequestDto;
 import jpabook.trello_project.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,4 +26,9 @@ public class Manager {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Manager (Card card, User user) {
+        this.card = card;
+        this.user = user;
+    }
 }
