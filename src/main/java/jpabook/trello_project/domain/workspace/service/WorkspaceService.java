@@ -84,8 +84,6 @@ public class WorkspaceService {
 
         Workspace updatedWorkspace = workspace.update(workspaceRequestDto);
 
-        // Workspace updatedWorkspace = workspaceRepository.save(workspace);
-
         return new WorkspaceResponseDto(updatedWorkspace);
     }
 
