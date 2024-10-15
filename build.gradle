@@ -23,6 +23,20 @@ repositories {
     mavenCentral()
 }
 
+/**
+ * QueryDSL Build Options
+ */
+def querydslDir = "src/main/generated"
+sourceSets {
+    main.java.srcDirs += [ querydslDir ]
+}
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+}
+clean.doLast {
+    file(querydslDir).deleteDir()
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -34,6 +48,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
     // bcrypt
     implementation 'at.favre.lib:bcrypt:0.10.2'
