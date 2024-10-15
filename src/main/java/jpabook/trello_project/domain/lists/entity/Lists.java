@@ -2,13 +2,15 @@ package jpabook.trello_project.domain.lists.entity;
 
 import jakarta.persistence.*;
 import jpabook.trello_project.domain.board.entity.Board;
+import jpabook.trello_project.domain.card.entity.Card;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "list")
 public class Lists {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +22,23 @@ public class Lists {
     private Board board;
 
     private String title;
-    private long order;
 
-    public Lists(Board board, String title, long order) {
+    private long listOrder;
+
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Card> cards;
+
+    public Lists(Board board, String title, long listOrder) {
         this.board = board;
         this.title = title;
-        this.order = order;
+        this.listOrder = listOrder;
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeListOrder(long listOrder) {
+        this.listOrder = listOrder;
     }
 }
