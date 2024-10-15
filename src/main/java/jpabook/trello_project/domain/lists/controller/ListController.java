@@ -8,6 +8,7 @@ import jpabook.trello_project.domain.user.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,12 +20,12 @@ public class ListController {
     private final ListService listService;
 
     @PostMapping
-    public ResponseEntity<ResponseDto<ListSaveResponseDto>> saveList(@PathVariable("workId") Long workId,
+    public ResponseEntity<ResponseDto<ListSaveResponseDto>> saveList(@AuthenticationPrincipal AuthUser authUser,
+                                                                     @PathVariable("workId") Long workId,
                                                                      @PathVariable("boardId") Long boardId,
                                                                      @RequestBody ListSaveRequestDto saveRequestDto) {
-        AuthUser user = new AuthUser(1L, "email@email.com", UserRole.ROLE_USER);    // !!임의값!! (@AuthUser 사용)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.of(201, listService.saveList(user, workId, boardId, saveRequestDto)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.of(201, listService.saveList(authUser, workId, boardId, saveRequestDto)));
     }
 
     @GetMapping("/{listId}")
@@ -41,33 +42,31 @@ public class ListController {
     }
 
     @PutMapping("/{listId}")
-    public ResponseEntity<ResponseDto<ListResponseDto>> changeList(@PathVariable("workId") Long workId,
+    public ResponseEntity<ResponseDto<ListResponseDto>> changeList(@AuthenticationPrincipal AuthUser authUser,
+                                                                   @PathVariable("workId") Long workId,
                                                                    @PathVariable("boardId") Long boardId,
                                                                    @PathVariable("listId") Long listId,
                                                                    @RequestBody ListChangeRequestDto changeDto) {
 
-        AuthUser user = new AuthUser(1L, "email@email.com", UserRole.ROLE_USER);    // !!임의값!! (@AuthUser 사용)
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.changeList(user, workId, boardId, listId, changeDto)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.changeList(authUser, workId, boardId, listId, changeDto)));
     }
 
     @PatchMapping("/{listId}")
-    public ResponseEntity<ResponseDto<String>> changeListOrder(@PathVariable("workId") Long workId,
-                                                                   @PathVariable("boardId") Long boardId,
-                                                                   @PathVariable("listId") Long listId,
-                                                                   @RequestBody ListOrderChangeRequestDto orderDto) {
+    public ResponseEntity<ResponseDto<String>> changeListOrder(@AuthenticationPrincipal AuthUser authUser,
+                                                               @PathVariable("workId") Long workId,
+                                                               @PathVariable("boardId") Long boardId,
+                                                               @PathVariable("listId") Long listId,
+                                                               @RequestBody ListOrderChangeRequestDto orderDto) {
 
-        AuthUser user = new AuthUser(1L, "email@email.com", UserRole.ROLE_USER);    // !!임의값!! (@AuthUser 사용)
-
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.changeListOrder(user, workId, boardId, listId, orderDto)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.changeListOrder(authUser, workId, boardId, listId, orderDto)));
     }
 
     @DeleteMapping("/{listId}")
-    public ResponseEntity<ResponseDto<String>> changeListOrder(@PathVariable("workId") Long workId,
+    public ResponseEntity<ResponseDto<String>> changeListOrder(@AuthenticationPrincipal AuthUser authUser,
+                                                               @PathVariable("workId") Long workId,
                                                                @PathVariable("boardId") Long boardId,
                                                                @PathVariable("listId") Long listId) {
-        AuthUser user = new AuthUser(1L, "email@email.com", UserRole.ROLE_USER);    // !!임의값!! (@AuthUser 사용)
 
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.deleteList(user, workId, boardId, listId)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.deleteList(authUser, workId, boardId, listId)));
     }
 }

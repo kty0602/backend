@@ -1,6 +1,7 @@
 package jpabook.trello_project.domain.user.enums;
 
-import jpabook.trello_project.domain.common.exceptions.InvalidRequestException;
+import jpabook.trello_project.domain.common.exceptions.ApiException;
+import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +20,7 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new InvalidRequestException("유효하지 않은 UserRole"));
+                .orElseThrow(() -> new ApiException(ErrorStatus._BAD_REQUEST_USER_ROLE));
     }
 
     public static class Authority {

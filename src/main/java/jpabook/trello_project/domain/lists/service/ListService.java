@@ -1,17 +1,17 @@
 package jpabook.trello_project.domain.lists.service;
 
-import jpabook.trello_project.domain.board.BoardRepository;
 import jpabook.trello_project.domain.board.entity.Board;
+import jpabook.trello_project.domain.board.repository.BoardRepository;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.ApiException;
 import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
 import jpabook.trello_project.domain.lists.dto.*;
 import jpabook.trello_project.domain.lists.entity.Lists;
 import jpabook.trello_project.domain.lists.repository.ListRepository;
-import jpabook.trello_project.domain.workspace.WorkSpaceRepository;
-import jpabook.trello_project.domain.workspace_member.WorkspaceMemberRepository;
+import jpabook.trello_project.domain.workspace.repository.WorkspaceRepository;
 import jpabook.trello_project.domain.workspace_member.entity.WorkspaceMember;
 import jpabook.trello_project.domain.workspace_member.enums.WorkRole;
+import jpabook.trello_project.domain.workspace_member.repository.WorkspaceMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,15 +25,15 @@ import java.util.stream.Collectors;
 public class ListService {
     private final ListRepository listRepository;
 
-    private final WorkSpaceRepository workspaceRepository;  // 교체
-    private final BoardRepository boardRepository;  // 교체
-    private final WorkspaceMemberRepository workspaceMemberRepository;  // 교체
+    private final WorkspaceRepository workspaceRepository;
+    private final BoardRepository boardRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     private void checkIfValidUser(AuthUser user, Long workId) {
         WorkspaceMember wm = workspaceMemberRepository.findByUserIdAndWorkspaceId(user.getId(), workId)
-                .orElseThrow(() -> new ApiException(ErrorStatus._INVALID_WORK_ROLE));
+                .orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_MEMBER));
         if(wm.getWorkRole() == WorkRole.ROLE_READONLY)
-            throw new ApiException(ErrorStatus._INVALID_WORK_ROLE);
+            throw new ApiException(ErrorStatus._UNAUTHORIZED_USER);
     }
 
     private void checkIfExist(Long workId, Long boardId) {

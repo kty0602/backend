@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
                 .body(errorStatus.getErrorStatus());
     }
 
+    @ExceptionHandler(InvalidTitleException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidTitleException(InvalidTitleException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+    }
+
     // method argument resolver 에서 validation 예외 발생시
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleBindException(MethodArgumentNotValidException ex) {

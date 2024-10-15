@@ -28,4 +28,13 @@ public class WorkspaceMember {
     @Enumerated(EnumType.STRING)
     private WorkRole workRole;
 
+    public WorkspaceMember(User user, Workspace workspace, WorkRole workRole) {
+        this.user = user;
+        this.workspace = workspace;
+        this.workRole = workRole;
+    }
+
+    public void changeRole(WorkRole workRole) {
+        this.workRole = workRole;
+    }
 }
