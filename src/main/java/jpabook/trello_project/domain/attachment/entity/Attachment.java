@@ -24,4 +24,9 @@ public class Attachment {
     @JoinColumn(name = "card_id", nullable = false)
     private Card card;
 
+    public Attachment(String url ,Card card) {
+        this.url = url;
+        this.card = card;
+    }
+
 }

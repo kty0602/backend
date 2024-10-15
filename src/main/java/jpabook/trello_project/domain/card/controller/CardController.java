@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/boards/{board_id}/lists/{list_id}")
+@RequestMapping("/workspaces/{work_Id}/boards/{board_id}/lists/{list_id}")
 public class CardController {
     private final CardService cardService;
 
     /**
+     * @param workId
      * @param boardId
      * @param listId
      * @param requestDto
@@ -28,11 +29,12 @@ public class CardController {
      */
     @PostMapping("/cards")
     public ResponseEntity<ResponseDto<CardResponseDto>> createCard(
+            @PathVariable("work_Id") Long workId,
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
             @RequestBody CreateCardRequestDto requestDto,
             @AuthenticationPrincipal AuthUser authUser) {
-        CardResponseDto responseDto = cardService.createCard(requestDto, listId, authUser);
+        CardResponseDto responseDto = cardService.createCard(requestDto, workId, listId, authUser);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseDto.of(HttpStatus.CREATED, responseDto));
     }
@@ -46,11 +48,12 @@ public class CardController {
      */
     @GetMapping("/cards/{card_id}")
     public ResponseEntity<ResponseDto<GetCardResponseDto>> getCard(
+            @PathVariable("work_Id") Long workId,
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @AuthenticationPrincipal AuthUser authUser) {
-        GetCardResponseDto responseDto = cardService.getCard(cardId, authUser);
+        GetCardResponseDto responseDto = cardService.getCard(cardId, workId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, responseDto));
     }
@@ -65,12 +68,13 @@ public class CardController {
      */
     @PatchMapping("/cards/{card_id}")
     public ResponseEntity<ResponseDto<CardResponseDto>> modifyCard(
+            @PathVariable("work_Id") Long workId,
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @RequestBody ModifyCardRequestDto requestDto,
             @AuthenticationPrincipal AuthUser authUser) {
-        CardResponseDto responseDto = cardService.modifyCard(cardId, requestDto, authUser);
+        CardResponseDto responseDto = cardService.modifyCard(cardId, requestDto, workId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, responseDto));
     }
@@ -84,11 +88,12 @@ public class CardController {
      */
     @DeleteMapping("/cards/{card_id}")
     public ResponseEntity<ResponseDto<String>> deleteCard(
+            @PathVariable("work_Id") Long workId,
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @AuthenticationPrincipal AuthUser authUser) {
-        cardService.deleteCard(cardId, authUser);
+        cardService.deleteCard(cardId, workId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, "성공적으로 삭제되었습니다."));
     }
