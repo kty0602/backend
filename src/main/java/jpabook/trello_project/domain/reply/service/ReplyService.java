@@ -61,6 +61,10 @@ public class ReplyService {
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
+        if(reply.getUser().getId() != authUser.getId()) {
+            throw new InvalidRequestException("작성자만 댓글을 수정할 수 있습니다.");
+        }
+
         if(requestDto.getContent() != null) {
             reply.changeContent(requestDto.getContent());
         }
@@ -78,6 +82,10 @@ public class ReplyService {
         WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
+
+        if(reply.getUser().getId() != authUser.getId()) {
+            throw new InvalidRequestException("작성자만 댓글을 삭제할 수 있습니다.");
+        }
 
         replyRepository.deleteById(reply.getId());
         log.info("::: 댓글 삭제 로직 완료 :::");
