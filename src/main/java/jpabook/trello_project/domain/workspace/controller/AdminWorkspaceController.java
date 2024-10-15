@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-public class WorkspaceAdminController {
+public class AdminWorkspaceController {
 
     private final WorkspaceAdminService workspaceAdminService;
 

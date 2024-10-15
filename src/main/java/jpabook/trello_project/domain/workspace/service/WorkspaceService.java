@@ -35,11 +35,14 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(workId)
                 .orElseThrow(() -> new AccessDeniedException("워크스페이스를 찾을 수 없습니다."));
 
-        WorkspaceMember workspaceMember = workspaceMemberRepository.findByUserAndWorkspace(User.fromAuthUser(authUser), workspace)
-                .orElseThrow(() -> new AccessDeniedException("워크스페이스의 멤버가 아닙니다."));
+        User currentUser = User.fromAuthUser(authUser);
+        if (!workspace.getUser().getId().equals(currentUser.getId())) {
+            WorkspaceMember workspaceMember = workspaceMemberRepository.findByUserAndWorkspace(currentUser, workspace)
+                    .orElseThrow(() -> new AccessDeniedException("워크스페이스의 멤버가 아닙니다."));
 
-        if (workspaceMember.getWorkRole() != WorkRole.ROLE_WORKSPACE) {
-            throw new AccessDeniedException("멤버를 초대할 권한이 없습니다.");
+            if (workspaceMember.getWorkRole() != WorkRole.ROLE_WORKSPACE) {
+                throw new AccessDeniedException("멤버를 초대할 권한이 없습니다.");
+            }
         }
 
         User newMember = userRepository.findByEmail(email)
