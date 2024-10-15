@@ -3,8 +3,11 @@ package jpabook.trello_project.domain.common.exceptions;
 import jpabook.trello_project.domain.common.dto.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,4 +25,23 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDto(HttpStatus.UNAUTHORIZED.value(), e.getMessage()));
     }
 
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponseDto> handleCustomException(ApiException e) {
+        BaseErrorStatus errorStatus = e.getErrorStatus();
+        return ResponseEntity.status(errorStatus.getHttpStatus())
+                .body(errorStatus.getErrorStatus());
+    }
+
+    // method argument resolver 에서 validation 예외 발생시
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDto> handleBindException(MethodArgumentNotValidException ex) {
+        String errorCodes = ex.getBindingResult().getAllErrors()
+                .stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(","));
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST, errorCodes));
+    }
 }
