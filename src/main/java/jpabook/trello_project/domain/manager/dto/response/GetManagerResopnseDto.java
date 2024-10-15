@@ -4,15 +4,12 @@ import jpabook.trello_project.domain.manager.entity.Manager;
 import lombok.Getter;
 
 @Getter
-public class ManagerResponseDto {
-    private Long id;
-    private Long cardId;
+public class GetManagerResopnseDto {
+    // 카드 조회 시 매니저 정보 확인을 위한 dto
     private Long userId;
     private String managerName;
 
-    public ManagerResponseDto(Manager manager) {
-        this.id = manager.getId();
-        this.cardId = manager.getCard().getId();
+    public GetManagerResopnseDto(Manager manager) {
         this.userId = manager.getUser().getId();
         this.managerName = manager.getUser().getName();
     }
