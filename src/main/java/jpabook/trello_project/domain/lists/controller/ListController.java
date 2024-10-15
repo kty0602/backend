@@ -4,7 +4,6 @@ import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.dto.ResponseDto;
 import jpabook.trello_project.domain.lists.dto.*;
 import jpabook.trello_project.domain.lists.service.ListService;
-import jpabook.trello_project.domain.user.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +46,7 @@ public class ListController {
     public ResponseEntity<ResponseDto<ListResponseDto>> getList(@PathVariable("workId") Long workId,
                                                                 @PathVariable("boardId") Long boardId,
                                                                 @PathVariable("listId") Long listId) {
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.getList(workId, boardId, listId)));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, listService.findList(workId, boardId, listId)));
     }
 
     /**
