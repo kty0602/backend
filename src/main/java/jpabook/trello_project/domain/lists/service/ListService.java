@@ -41,6 +41,11 @@ public class ListService {
         boardRepository.findById(boardId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_BOARD));
     }
 
+    private Lists findList(Long boardId, Long listId) {
+        return listRepository.findByIdAndBoardId(listId, boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+    }
+
     @Transactional
     public ListSaveResponseDto saveList(AuthUser user, Long workId, Long boardId, ListSaveRequestDto requestDto) {
         checkIfValidUser(user, workId);
@@ -50,15 +55,15 @@ public class ListService {
         return new ListSaveResponseDto(savedList);
     }
 
-    public ListResponseDto getList(Long workId, Long boardId, Long listId) {
+    public ListResponseDto findList(Long workId, Long boardId, Long listId) {
         checkIfExist(workId, boardId);
-        Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+        Lists list = findList(boardId, listId);
         return new ListResponseDto(list);
     }
 
     public List<ListResponseDto> getLists(Long workId, Long boardId) {
         checkIfExist(workId, boardId);
-        List<ListResponseDto> responseDtos = listRepository.findAll().stream()
+        List<ListResponseDto> responseDtos = listRepository.findAllByBoardId(boardId).stream()
                 .map(ListResponseDto::new)
                 .collect(Collectors.toList());
         return responseDtos;
@@ -68,7 +73,7 @@ public class ListService {
     public ListResponseDto changeList(AuthUser user, Long workId, Long boardId, Long listId, ListChangeRequestDto changeDto) {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
-        Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+        Lists list = findList(boardId, listId);
         list.changeTitle(changeDto.getNewTitle());
         return new ListResponseDto(list);
     }
@@ -77,7 +82,7 @@ public class ListService {
     public String changeListOrder(AuthUser user, Long workId, Long boardId, Long listId, ListOrderChangeRequestDto orderDto) {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
-        Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+        Lists list = findList(boardId, listId);
 
         long newOrder = orderDto.getNewListOrder();
         long curOrder = list.getListOrder();
@@ -95,7 +100,8 @@ public class ListService {
     public String deleteList(AuthUser user, Long workId, Long boardId, Long listId) {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
-        listRepository.deleteById(listId);
+        Lists list = findList(boardId, listId);
+        listRepository.delete(list);
         return "리스트 삭제가 완료되었습니다.";
     }
 }
