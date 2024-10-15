@@ -14,56 +14,74 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/card/{card_id}")
+@RequestMapping("/workspaces/{work_Id}/boards/{board_id}/lists/{list_id}/card/{card_id}")
 public class ReplyController {
     private final ReplyService replyService;
 
     /**
+     * @param workId
+     * @param boardId
+     * @param listId
      * @param cardId
      * @param requestDto
      * @param authUser
-     * @return ResponseDto
+     * @return
      */
     @PostMapping("/replies")
     public ResponseEntity<ResponseDto<ReplyResponseDto>> createReply(
+            @PathVariable("work_Id") Long workId,
+            @PathVariable("board_id") Long boardId,
+            @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @RequestBody CreateReplyRequestDto requestDto,
             @AuthenticationPrincipal AuthUser authUser) {
-        ReplyResponseDto responseDto = replyService.createReply(requestDto, cardId, authUser);
+        ReplyResponseDto responseDto = replyService.createReply(requestDto, cardId, workId, authUser);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseDto.of(HttpStatus.CREATED, responseDto));
     }
 
     /**
+     * @param workId
+     * @param boardId
+     * @param listId
      * @param cardId
      * @param replyId
      * @param requestDto
      * @param authUser
-     * @return ResponseDto
+     * @return
      */
     @PatchMapping("/replies/{reply_id}")
     public ResponseEntity<ResponseDto<ReplyResponseDto>> modifyReply(
+            @PathVariable("work_Id") Long workId,
+            @PathVariable("board_id") Long boardId,
+            @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @PathVariable("reply_id") Long replyId,
             @RequestBody ModifyReplyRequestDto requestDto,
             @AuthenticationPrincipal AuthUser authUser) {
-        ReplyResponseDto responseDto = replyService.modifyReply(replyId, requestDto, authUser);
+        ReplyResponseDto responseDto = replyService.modifyReply(replyId, requestDto, workId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, responseDto));
     }
 
     /**
+     * @param workId
+     * @param boardId
+     * @param listId
      * @param cardId
      * @param replyId
      * @param authUser
-     * @return ResponseDto
+     * @return
      */
     @DeleteMapping("/replies/{reply_id}")
     public ResponseEntity<ResponseDto<String>> deleteReply(
+            @PathVariable("work_Id") Long workId,
+            @PathVariable("board_id") Long boardId,
+            @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @PathVariable("reply_id") Long replyId,
             @AuthenticationPrincipal AuthUser authUser) {
-        replyService.deleteReply(replyId, authUser);
+        replyService.deleteReply(replyId, workId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, "성공적으로 삭제되었습니다."));
     }

@@ -25,12 +25,12 @@ public class ManagerService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
-    public ManagerResponseDto createManager(ManagerRequestDto requestDto, Long cardId, AuthUser authUser) {
+    public ManagerResponseDto createManager(ManagerRequestDto requestDto, Long cardId, Long workId, AuthUser authUser) {
         log.info("::: 담당자 저장 로직 동작 :::");
         // 요청 보내는 사람이 워크스페이스 멤버인가?
-        checkMemberExist(authUser.getId());
-        // 담당자가 현재 워크스페이스 멤버인지 확인
-        WorkspaceMember workspaceMember = checkMemberExist(requestDto.getUserId());
+        checkMemberExist(authUser.getId(), workId);
+        // 배정하려고 하는 담당자가 현재 워크스페이스 멤버인지 확인
+        WorkspaceMember workspaceMember = checkMemberExist(requestDto.getUserId(), workId);
         // 배정하려고 하는 카드가 존재하는지
         Card card  = checkCardExist(cardId);
 
@@ -46,9 +46,9 @@ public class ManagerService {
                 .orElseThrow(() -> new InvalidRequestException("해당 카드가 없습니다!"));
     }
 
-    private WorkspaceMember checkMemberExist(Long userId) {
+    private WorkspaceMember checkMemberExist(Long userId, Long workId) {
         log.info("::: 멤버 검사 로직 동작 :::");
-        return workspaceMemberRepository.findById(userId)
+        return workspaceMemberRepository.findByUserIdAndWorkspaceId(userId, workId)
                 .orElseThrow(() -> new InvalidRequestException("해당 멤버가 없습니다!"));
     }
 }

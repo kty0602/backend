@@ -1,20 +1,31 @@
 package jpabook.trello_project.domain.card.service;
 
+import jpabook.trello_project.domain.board.entity.Board;
+import jpabook.trello_project.domain.board.repository.BoardRepository;
+import jpabook.trello_project.domain.card.dto.CardSearchCondition;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
 import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
+import jpabook.trello_project.domain.card.dto.response.CardSearchResponse;
 import jpabook.trello_project.domain.card.dto.response.GetCardResponseDto;
 import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.repository.CardRepository;
 import jpabook.trello_project.domain.common.dto.AuthUser;
+import jpabook.trello_project.domain.common.exceptions.ApiException;
+import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
 import jpabook.trello_project.domain.common.exceptions.InvalidRequestException;
 import jpabook.trello_project.domain.lists.entity.Lists;
 import jpabook.trello_project.domain.lists.repository.ListRepository;
+import jpabook.trello_project.domain.user.entity.User;
+import jpabook.trello_project.domain.user.service.UserService;
 import jpabook.trello_project.domain.workspace_member.entity.WorkspaceMember;
 import jpabook.trello_project.domain.workspace_member.enums.WorkRole;
 import jpabook.trello_project.domain.workspace_member.repository.WorkspaceMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +37,14 @@ public class CardService {
     private final CardRepository cardRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final ListRepository listRepository;
+    private final BoardRepository boardRepository;
+    private final UserService userService;
 
     @Transactional
-    public CardResponseDto createCard(CreateCardRequestDto requestDto, Long listId, AuthUser authUser) {
+    public CardResponseDto createCard(CreateCardRequestDto requestDto, Long workId, Long listId, AuthUser authUser) {
         log.info("::: 카드 저장 로직 동작 :::");
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -45,13 +58,13 @@ public class CardService {
     }
 
     @Transactional
-    public CardResponseDto modifyCard(Long id, ModifyCardRequestDto requestDto, AuthUser authUser) {
+    public CardResponseDto modifyCard(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) {
         log.info("::: 카드 수정 로직 동작 :::");
 
         // 카드 존재 유무 검사
         Card card = checkCardExist(id);
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -68,10 +81,35 @@ public class CardService {
         return new CardResponseDto(newCard);
     }
 
-    public GetCardResponseDto getCard(Long id, AuthUser authUser) {
+    public Page<CardSearchResponse> searchCards(AuthUser authUser, int page, int size, CardSearchCondition condition) {
+
+        User user = userService.findByEmail(authUser.getEmail());
+
+        // board id 유효성 검사
+        Board board = boardRepository.findById(condition.getBoardId())
+                .orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_BOARD));
+
+        // workspace 멤버인지 확인
+        if (!workspaceMemberRepository.existsByUserAndWorkspace(user, board.getWorkspace()))
+            throw new ApiException(ErrorStatus._UNAUTHORIZED_USER);
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Card> cards = cardRepository.findCardsByCondition(condition, pageable);
+
+        return cards.map(card -> new CardSearchResponse(
+                card.getId(),
+                card.getList().getId(),
+                card.getTitle(),
+                card.getInfo(),
+                card.getDue()
+        ));
+    }
+
+    public GetCardResponseDto getCard(Long id, Long workId, AuthUser authUser) {
         log.info("::: 카드 수정 조회 동작 :::");
         // 멤버 존재 검사 -> 이후 권한 검사 불필요
-        checkMemberExist(authUser.getId());
+        checkMemberExist(authUser.getId(), workId);
         // 카드 존재 유무 검사
         Card card = checkCardExist(id);
 
@@ -80,12 +118,12 @@ public class CardService {
     }
 
     @Transactional
-    public void deleteCard(Long id, AuthUser authUser) {
+    public void deleteCard(Long id, Long workId, AuthUser authUser) {
         log.info("::: 카드 삭제 로직 동작 :::");
 
         Card card = checkCardExist(id);
         // 멤버 존재 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -99,9 +137,9 @@ public class CardService {
                 .orElseThrow(() -> new InvalidRequestException("해당 카드가 없습니다!"));
     }
 
-    private WorkspaceMember checkMemberExist(Long id) {
+    private WorkspaceMember checkMemberExist(Long id, Long workId) {
         log.info("::: 회원 -> 멤버 검사 로직 동작 :::");
-        return workspaceMemberRepository.findById(id)
+        return workspaceMemberRepository.findByUserIdAndWorkspaceId(id, workId)
                 .orElseThrow(() -> new InvalidRequestException("해당 멤버가 없습니다!"));
     }
 

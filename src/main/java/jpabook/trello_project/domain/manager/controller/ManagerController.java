@@ -13,26 +13,28 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/boards/{board_id}/lists/{list_id}/cards/{card_id}")
+@RequestMapping("/workspaces/{work_Id}/boards/{board_id}/lists/{list_id}/cards/{card_id}")
 public class ManagerController {
     private final ManagerService managerService;
 
     /**
+     * @param workId
      * @param boardId
      * @param listId
      * @param cardId
      * @param requestDto
      * @param authUser
-     * @return ResponseDto
+     * @return
      */
     @PostMapping
     public ResponseEntity<ResponseDto<ManagerResponseDto>> createManager(
+            @PathVariable("work_Id") Long workId,
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @RequestBody ManagerRequestDto requestDto,
             @AuthenticationPrincipal AuthUser authUser) {
-        ManagerResponseDto responseDto = managerService.createManager(requestDto, cardId, authUser);
+        ManagerResponseDto responseDto = managerService.createManager(requestDto, cardId, workId, authUser);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseDto.of(HttpStatus.CREATED, responseDto));
     }

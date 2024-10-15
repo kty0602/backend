@@ -33,7 +33,7 @@ public class ReplyService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ReplyResponseDto createReply(CreateReplyRequestDto requestDto, Long cardId, AuthUser authUser) {
+    public ReplyResponseDto createReply(CreateReplyRequestDto requestDto, Long cardId, Long workId, AuthUser authUser) {
         log.info("::: 댓글 저장 로직 동작 :::");
         // 회원 정보 리턴
         User user = userRepository.findById(authUser.getId())
@@ -41,7 +41,7 @@ public class ReplyService {
         // 카드 존재 유무 검사
         Card card = checkCardExist(cardId);
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -52,12 +52,12 @@ public class ReplyService {
     }
 
     @Transactional
-    public ReplyResponseDto modifyReply(Long id, ModifyReplyRequestDto requestDto, AuthUser authUser) {
+    public ReplyResponseDto modifyReply(Long id, ModifyReplyRequestDto requestDto, Long workId, AuthUser authUser) {
         log.info("::: 댓글 수정 로직 동작 :::");
 
         Reply reply = checkReplyExist(id);
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -74,12 +74,12 @@ public class ReplyService {
     }
 
     @Transactional
-    public void deleteReply(Long id, AuthUser authUser) {
+    public void deleteReply(Long id, Long workId, AuthUser authUser) {
         log.info("::: 댓글 삭제 로직 동작 :::");
 
         Reply reply = checkReplyExist(id);
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -104,9 +104,9 @@ public class ReplyService {
                 .orElseThrow(() -> new InvalidRequestException("해당 댓글이 없습니다!"));
     }
 
-    private WorkspaceMember checkMemberExist(Long id) {
+    private WorkspaceMember checkMemberExist(Long id, Long workId) {
         log.info("::: 회원 -> 멤버 검사 로직 동작 :::");
-        return workspaceMemberRepository.findById(id)
+        return workspaceMemberRepository.findByUserIdAndWorkspaceId(id, workId)
                 .orElseThrow(() -> new InvalidRequestException("해당 멤버가 없습니다!"));
     }
 
