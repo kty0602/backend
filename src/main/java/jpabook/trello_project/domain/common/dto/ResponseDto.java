@@ -1,5 +1,6 @@
 package jpabook.trello_project.domain.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ResponseDto<T>{
     public int statusCode;
     public String message;
