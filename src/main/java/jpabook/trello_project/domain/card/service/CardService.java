@@ -28,10 +28,10 @@ public class CardService {
     private final ListRepository listRepository;
 
     @Transactional
-    public CardResponseDto createCard(CreateCardRequestDto requestDto, Long listId, AuthUser authUser) {
+    public CardResponseDto createCard(CreateCardRequestDto requestDto, Long workId, Long listId, AuthUser authUser) {
         log.info("::: 카드 저장 로직 동작 :::");
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -45,13 +45,13 @@ public class CardService {
     }
 
     @Transactional
-    public CardResponseDto modifyCard(Long id, ModifyCardRequestDto requestDto, AuthUser authUser) {
+    public CardResponseDto modifyCard(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) {
         log.info("::: 카드 수정 로직 동작 :::");
 
         // 카드 존재 유무 검사
         Card card = checkCardExist(id);
         // 멤버 로직 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -68,10 +68,10 @@ public class CardService {
         return new CardResponseDto(newCard);
     }
 
-    public GetCardResponseDto getCard(Long id, AuthUser authUser) {
+    public GetCardResponseDto getCard(Long id, Long workId, AuthUser authUser) {
         log.info("::: 카드 수정 조회 동작 :::");
         // 멤버 존재 검사 -> 이후 권한 검사 불필요
-        checkMemberExist(authUser.getId());
+        checkMemberExist(authUser.getId(), workId);
         // 카드 존재 유무 검사
         Card card = checkCardExist(id);
 
@@ -80,12 +80,12 @@ public class CardService {
     }
 
     @Transactional
-    public void deleteCard(Long id, AuthUser authUser) {
+    public void deleteCard(Long id, Long workId, AuthUser authUser) {
         log.info("::: 카드 삭제 로직 동작 :::");
 
         Card card = checkCardExist(id);
         // 멤버 존재 검사
-        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId());
+        WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
@@ -99,9 +99,9 @@ public class CardService {
                 .orElseThrow(() -> new InvalidRequestException("해당 카드가 없습니다!"));
     }
 
-    private WorkspaceMember checkMemberExist(Long id) {
+    private WorkspaceMember checkMemberExist(Long id, Long workId) {
         log.info("::: 회원 -> 멤버 검사 로직 동작 :::");
-        return workspaceMemberRepository.findById(id)
+        return workspaceMemberRepository.findByUserIdAndWorkspaceId(id, workId)
                 .orElseThrow(() -> new InvalidRequestException("해당 멤버가 없습니다!"));
     }
 
