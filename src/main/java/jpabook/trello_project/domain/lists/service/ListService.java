@@ -30,15 +30,25 @@ public class ListService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
     private void checkIfValidUser(AuthUser user, Long workId) {
+        // 워크 스페이스에 추가되지 않은 유저라면 예외 발생
         WorkspaceMember wm = workspaceMemberRepository.findByUserIdAndWorkspaceId(user.getId(), workId)
                 .orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_MEMBER));
+
+        // 수정 작업 하려는 유저가 READ_ONLY 역할을 갖고 있다면 예외 발생
         if(wm.getWorkRole() == WorkRole.ROLE_READONLY)
             throw new ApiException(ErrorStatus._UNAUTHORIZED_USER);
     }
 
     private void checkIfExist(Long workId, Long boardId) {
+        // 입력한 workId, boardId가 존재하지 않는다면 예외 발생
         workspaceRepository.findById(workId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_WORKSPACE));
         boardRepository.findById(boardId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_BOARD));
+    }
+
+    private Lists findList(Long boardId, Long listId) {
+        // 특정 보드의 list를 찾아 반환
+        return listRepository.findByIdAndBoardId(listId, boardId)
+                .orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
     }
 
     @Transactional
@@ -46,19 +56,19 @@ public class ListService {
         checkIfValidUser(user, workId);
         workspaceRepository.findById(workId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_WORKSPACE));
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_BOARD));
-        Lists savedList = listRepository.save(new Lists(board, requestDto.getTitle(), listRepository.findMaxListOrder() + 1));
+        Lists savedList = listRepository.save(new Lists(board, requestDto.getTitle(), listRepository.findMaxListOrder(boardId) + 1));
         return new ListSaveResponseDto(savedList);
     }
 
-    public ListResponseDto getList(Long workId, Long boardId, Long listId) {
+    public ListResponseDto findList(Long workId, Long boardId, Long listId) {
         checkIfExist(workId, boardId);
-        Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+        Lists list = findList(boardId, listId);
         return new ListResponseDto(list);
     }
 
     public List<ListResponseDto> getLists(Long workId, Long boardId) {
         checkIfExist(workId, boardId);
-        List<ListResponseDto> responseDtos = listRepository.findAll().stream()
+        List<ListResponseDto> responseDtos = listRepository.findAllByBoardId(boardId).stream()
                 .map(ListResponseDto::new)
                 .collect(Collectors.toList());
         return responseDtos;
@@ -68,7 +78,7 @@ public class ListService {
     public ListResponseDto changeList(AuthUser user, Long workId, Long boardId, Long listId, ListChangeRequestDto changeDto) {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
-        Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+        Lists list = findList(boardId, listId);
         list.changeTitle(changeDto.getNewTitle());
         return new ListResponseDto(list);
     }
@@ -77,9 +87,17 @@ public class ListService {
     public String changeListOrder(AuthUser user, Long workId, Long boardId, Long listId, ListOrderChangeRequestDto orderDto) {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
-        Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+        Lists list = findList(boardId, listId);
+
+        long newOrder = orderDto.getNewListOrder();
+        long curOrder = list.getListOrder();
+        if (newOrder < curOrder) {  // 순서를 앞으로 이동하는 경우
+            listRepository.increaseListOrderBetween(newOrder, curOrder, boardId);
+        } else { // 순서를 뒤로 이동하는 경우
+            listRepository.decreaseListOrderBetween(newOrder, curOrder, boardId);
+        }
+
         list.changeListOrder(orderDto.getNewListOrder());
-        listRepository.updateListOrders(list.getListOrder());
         return "리스트 순서가 변경되었습니다.";
     }
 
@@ -87,7 +105,8 @@ public class ListService {
     public String deleteList(AuthUser user, Long workId, Long boardId, Long listId) {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
-        listRepository.deleteById(listId);
+        Lists list = findList(boardId, listId);
+        listRepository.delete(list);
         return "리스트 삭제가 완료되었습니다.";
     }
 }
