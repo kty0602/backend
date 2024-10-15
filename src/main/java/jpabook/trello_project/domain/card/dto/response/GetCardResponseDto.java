@@ -2,6 +2,7 @@ package jpabook.trello_project.domain.card.dto.response;
 
 import jpabook.trello_project.domain.attachment.dto.response.AttachmentResponseDto;
 import jpabook.trello_project.domain.card.entity.Card;
+import jpabook.trello_project.domain.reply.dto.response.ReplyResponseDto;
 import lombok.Getter;
 
 import java.time.LocalTime;
@@ -15,6 +16,7 @@ public class GetCardResponseDto {
     private String info;
     private LocalTime due;
     private List<AttachmentResponseDto> attachmentList;
+    private List<ReplyResponseDto> replyList;
 
     public GetCardResponseDto(Card card) {
         this.id = card.getId();
@@ -23,6 +25,9 @@ public class GetCardResponseDto {
         this.due = card.getDue();
         this.attachmentList = card.getAttachmentList().stream()
                 .map(AttachmentResponseDto::new)
+                .collect(Collectors.toList());
+        this.replyList = card.getReplyList().stream()
+                .map(ReplyResponseDto::new)
                 .collect(Collectors.toList());
     }
 

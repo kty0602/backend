@@ -21,7 +21,7 @@ public class CardService {
     private final CardRepository cardRepository;
 
     @Transactional
-    public CardResponseDto createCard(CreateCardRequestDto requestDto, Long id, AuthUser authUser) {
+    public CardResponseDto createCard(CreateCardRequestDto requestDto, Long listId, AuthUser authUser) {
         log.info("::: 카드 저장 로직 동작 :::");
         // 회원 로직 검사
         log.info("::: 회원 -> 멤버 검사 로직 동작 :::");
