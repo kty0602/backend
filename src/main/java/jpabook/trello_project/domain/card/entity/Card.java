@@ -8,7 +8,7 @@ import jpabook.trello_project.domain.manager.entity.Manager;
 import jpabook.trello_project.domain.reply.entity.Reply;
 import lombok.*;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class Card {
     @Column(length = 100)
     private String info;
     @Column(length = 50)
-    private LocalTime due;
+    private LocalDate due;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id", nullable = false)
     private Lists list;
@@ -52,6 +52,6 @@ public class Card {
 
     public void changeTitle(String title) { this.title = title; }
     public void changeInfo(String info) { this.info = info; }
-    public void changeDue(LocalTime due) { this.due = due; }
+    public void changeDue(LocalDate due) { this.due = due; }
 
 }

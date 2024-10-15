@@ -6,6 +6,7 @@ import jpabook.trello_project.domain.manager.dto.response.GetManagerResopnseDto;
 import jpabook.trello_project.domain.reply.dto.response.ReplyResponseDto;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ public class GetCardResponseDto {
     private Long id;
     private String title;
     private String info;
-    private LocalTime due;
+    private LocalDate due;
     private List<AttachmentResponseDto> attachmentList;
     private List<ReplyResponseDto> replyList;
     private List<GetManagerResopnseDto> managers;
