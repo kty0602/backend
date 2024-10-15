@@ -3,6 +3,7 @@ package jpabook.trello_project.domain.reply.entity;
 import jakarta.persistence.*;
 
 import jpabook.trello_project.domain.card.entity.Card;
+import jpabook.trello_project.domain.reply.dto.request.CreateReplyRequestDto;
 import jpabook.trello_project.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +31,11 @@ public class Reply {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // 유저 추가해야함
+    public Reply(CreateReplyRequestDto requestDto, Card card) {
+        this.content = requestDto.getContent();
+        this.card = card;
+    }
+
+    public void changeContent(String content) { this.content = content; }
 }
