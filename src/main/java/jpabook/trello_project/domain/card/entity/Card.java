@@ -30,7 +30,7 @@ public class Card {
     @Column(length = 50)
     private LocalDate due;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "list_id", nullable = false)
+    @JoinColumn(name = "lists_id", nullable = false)
     private Lists list;
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Attachment> attachmentList = new ArrayList<>();
@@ -40,11 +40,11 @@ public class Card {
     private List<Manager> managers = new ArrayList<>();
 
     // lists 집어넣는거 아직 추가 안됨
-    public Card(CreateCardRequestDto requestDto) {
+    public Card(CreateCardRequestDto requestDto, Lists list) {
         this.title = requestDto.getTitle();
         this.info = requestDto.getInfo();
         this.due = requestDto.getDue();
-        // this.list = list;
+        this.list = list;
         this.attachmentList = new ArrayList<>();
         this.replyList = new ArrayList<>();
         this.managers = new ArrayList<>();

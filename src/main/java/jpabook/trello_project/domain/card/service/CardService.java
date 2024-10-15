@@ -8,6 +8,8 @@ import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.repository.CardRepository;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.InvalidRequestException;
+import jpabook.trello_project.domain.lists.entity.Lists;
+import jpabook.trello_project.domain.lists.repository.ListRepository;
 import jpabook.trello_project.domain.workspace_member.entity.WorkspaceMember;
 import jpabook.trello_project.domain.workspace_member.enums.WorkRole;
 import jpabook.trello_project.domain.workspace_member.repository.WorkspaceMemberRepository;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CardService {
     private final CardRepository cardRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final ListRepository listRepository;
 
     @Transactional
     public CardResponseDto createCard(CreateCardRequestDto requestDto, Long listId, AuthUser authUser) {
@@ -33,9 +36,9 @@ public class CardService {
         validateWorkRole(workspaceMember.getWorkRole());
 
         log.info("::: lists 반환 로직 동작 :::");
+        Lists list = listRepository.findById(listId).orElseThrow(() -> new InvalidRequestException("해당 리스트가 없습니다!"));
 
-        // lists 추가 해야함
-        Card card = new Card(requestDto);
+        Card card = new Card(requestDto, list);
         Card createCard = cardRepository.save(card);
         log.info("::: 카드 저장 로직 완료 :::");
         return new CardResponseDto(createCard);

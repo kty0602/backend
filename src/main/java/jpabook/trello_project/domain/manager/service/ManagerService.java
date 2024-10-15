@@ -9,6 +9,7 @@ import jpabook.trello_project.domain.manager.dto.response.ManagerResponseDto;
 import jpabook.trello_project.domain.manager.entity.Manager;
 import jpabook.trello_project.domain.manager.repository.ManagerRepository;
 import jpabook.trello_project.domain.workspace_member.entity.WorkspaceMember;
+import jpabook.trello_project.domain.workspace_member.repository.WorkspaceMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ManagerService {
     private final ManagerRepository managerRepository;
     private final CardRepository cardRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     @Transactional
     public ManagerResponseDto createManager(ManagerRequestDto requestDto, Long cardId, AuthUser authUser) {
@@ -34,7 +36,7 @@ public class ManagerService {
 
         Manager manager = new Manager(card, workspaceMember.getUser());
         Manager newManager = managerRepository.save(manager);
-        log.info("::: 담당자 저장 로직 동작 :::");
+        log.info("::: 담당자 저장 동작 완료 :::");
         return new ManagerResponseDto(newManager);
     }
 
@@ -46,6 +48,7 @@ public class ManagerService {
 
     private WorkspaceMember checkMemberExist(Long userId) {
         log.info("::: 멤버 검사 로직 동작 :::");
-        return null;
+        return workspaceMemberRepository.findById(userId)
+                .orElseThrow(() -> new InvalidRequestException("해당 멤버가 없습니다!"));
     }
 }
