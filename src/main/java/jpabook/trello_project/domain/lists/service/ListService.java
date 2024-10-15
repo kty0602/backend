@@ -78,8 +78,16 @@ public class ListService {
         checkIfValidUser(user, workId);
         checkIfExist(workId, boardId);
         Lists list = listRepository.findById(listId).orElseThrow(() -> new ApiException(ErrorStatus._NOT_FOUND_LIST));
+
+        long newOrder = orderDto.getNewListOrder();
+        long curOrder = list.getListOrder();
+        if (newOrder < curOrder) {  // 순서를 앞으로 이동하는 경우
+            listRepository.increaseListOrderBetween(newOrder, curOrder);
+        } else { // 순서를 뒤로 이동하는 경우
+            listRepository.decreaseListOrderBetween(newOrder, curOrder);
+        }
+
         list.changeListOrder(orderDto.getNewListOrder());
-        listRepository.updateListOrders(list.getListOrder());
         return "리스트 순서가 변경되었습니다.";
     }
 

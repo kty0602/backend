@@ -12,7 +12,12 @@ public interface ListRepository extends JpaRepository<Lists, Long> {
     int findMaxListOrder();
 
     @Modifying
-    @Query("UPDATE Lists l SET l.listOrder = l.listOrder + 1 WHERE l.listOrder < :changedOrder")
-    void updateListOrders(@Param("changedOrder") long changedOrder);
+    @Query("UPDATE Lists l SET l.listOrder = l.listOrder + 1 " +
+            "WHERE l.listOrder >= :newOrder AND l.listOrder < :curOrder")
+    void increaseListOrderBetween(@Param("newOrder") long newOrder, @Param("curOrder") long curOrder);
 
+    @Modifying
+    @Query("UPDATE Lists l SET l.listOrder = l.listOrder - 1 " +
+            "WHERE l.listOrder <= :newOrder AND l.listOrder > :curOrder")
+    void decreaseListOrderBetween(@Param("newOrder") long newOrder, @Param("curOrder") long curOrder);
 }
