@@ -1,6 +1,7 @@
 package jpabook.trello_project.domain.user.entity;
 
 import jakarta.persistence.*;
+import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.user.enums.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,16 @@ public class User {
         this.name = name;
         this.password = password;
         this.userRole = userRole;
+    }
+    public User(Long id, String name, String email, UserRole userRole) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.userRole = userRole;
+    }
+
+    public static User fromAuthUser(AuthUser authUser) {
+        return new User(authUser.getId(), authUser.getEmail(), authUser.getName(), UserRole.valueOf(authUser.getAuthorities().iterator().next().getAuthority()));
     }
 
     public void withdraw() {
