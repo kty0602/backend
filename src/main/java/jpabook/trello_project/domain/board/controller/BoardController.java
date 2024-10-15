@@ -3,6 +3,7 @@ package jpabook.trello_project.domain.board.controller;
 import jakarta.validation.Valid;
 import jpabook.trello_project.domain.board.dto.request.BoardRequestDto;
 import jpabook.trello_project.domain.board.dto.response.BoardResponseDto;
+import jpabook.trello_project.domain.board.dto.response.OneBoardResponseDto;
 import jpabook.trello_project.domain.board.service.BoardService;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.dto.ResponseDto;
@@ -39,12 +40,12 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    public ResponseEntity<ResponseDto<BoardResponseDto>>getOneBoard(
+    public ResponseEntity<ResponseDto<OneBoardResponseDto>>getOneBoard(
             @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long workId,
             @PathVariable Long boardId
     ) {
-        BoardResponseDto responseDto = boardService.getOneBoard(authUser, workId, boardId);
+        OneBoardResponseDto responseDto = boardService.getOneBoard(authUser, workId, boardId);
 
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.of(200, responseDto));
     }

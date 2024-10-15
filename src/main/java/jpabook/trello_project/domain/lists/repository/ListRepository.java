@@ -1,10 +1,14 @@
 package jpabook.trello_project.domain.lists.repository;
 
+import jpabook.trello_project.domain.board.entity.Board;
 import jpabook.trello_project.domain.lists.entity.Lists;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface ListRepository extends JpaRepository<Lists, Long> {
 
@@ -15,4 +19,5 @@ public interface ListRepository extends JpaRepository<Lists, Long> {
     @Query("UPDATE Lists l SET l.listOrder = l.listOrder + 1 WHERE l.listOrder < :changedOrder")
     void updateListOrders(@Param("changedOrder") long changedOrder);
 
+    List<Lists> findByBoard(Board board);
 }
