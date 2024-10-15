@@ -44,7 +44,7 @@ public class CardController {
      * @param authUser
      * @return ResponseDto
      */
-    @GetMapping("/{card_id}")
+    @GetMapping("/cards/{card_id}")
     public ResponseEntity<ResponseDto<GetCardResponseDto>> getCard(
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
@@ -63,7 +63,7 @@ public class CardController {
      * @param authUser
      * @return ResponseDto
      */
-    @PatchMapping("/{card_id}")
+    @PatchMapping("/cards/{card_id}")
     public ResponseEntity<ResponseDto<CardResponseDto>> modifyCard(
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,
@@ -82,7 +82,7 @@ public class CardController {
      * @param authUser
      * @return ResponseDto
      */
-    @DeleteMapping("/{card_id}")
+    @DeleteMapping("/cards/{card_id}")
     public ResponseEntity<ResponseDto<String>> deleteCard(
             @PathVariable("board_id") Long boardId,
             @PathVariable("list_id") Long listId,

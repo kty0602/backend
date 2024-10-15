@@ -28,6 +28,7 @@ public class CardService {
 
         log.info("::: 멤버 권한 로직 동작 :::");
 
+        // lists 추가 해야함
         Card card = new Card(requestDto);
         Card createCard = cardRepository.save(card);
         log.info("::: 카드 저장 로직 완료 :::");
