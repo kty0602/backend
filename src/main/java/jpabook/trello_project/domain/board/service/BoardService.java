@@ -53,7 +53,6 @@ public class BoardService {
     private final ListRepository listRepository;
     private final CardRepository cardRepository;
 
-    // Create a new board with optional background image upload
     @Transactional
     public BoardResponseDto createBoard(AuthUser authUser, Long workId, BoardRequestDto boardRequestDto, MultipartFile backgroundImageFile) throws IOException {
 
@@ -183,7 +182,6 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
-    // S3에 새로운 배경 이미지를 업로드하는 메서드
     private String uploadImageToS3(MultipartFile file) throws IOException {
         String fileName = file.getOriginalFilename();
         String fileUrl = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + fileName;
@@ -197,7 +195,6 @@ public class BoardService {
         return fileUrl;
     }
 
-    // S3에서 기존 이미지를 삭제하는 메서드
     private void deleteImageFromS3(String imageUrl) {
         // URL에서 파일명 추출
         String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
