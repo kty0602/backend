@@ -12,18 +12,19 @@ import java.util.Optional;
 
 public interface ListRepository extends JpaRepository<Lists, Long> {
 
-    @Query("SELECT COALESCE(MAX(l.listOrder), 0) FROM Lists l ")
-    int findMaxListOrder();
+    @Query("SELECT COALESCE(MAX(l.listOrder), 0) FROM Lists l " +
+            "WHERE l.board.id = :boardId")
+    int findMaxListOrder(@Param("boardId") long boardId);
 
     @Modifying
     @Query("UPDATE Lists l SET l.listOrder = l.listOrder + 1 " +
-            "WHERE l.listOrder >= :newOrder AND l.listOrder < :curOrder")
-    void increaseListOrderBetween(@Param("newOrder") long newOrder, @Param("curOrder") long curOrder);
+            "WHERE l.listOrder >= :newOrder AND l.listOrder < :curOrder AND l.board.id = :boardId")
+    void increaseListOrderBetween(@Param("newOrder") long newOrder, @Param("curOrder") long curOrder, @Param("boardId") long boardId);
 
     @Modifying
     @Query("UPDATE Lists l SET l.listOrder = l.listOrder - 1 " +
-            "WHERE l.listOrder <= :newOrder AND l.listOrder > :curOrder")
-    void decreaseListOrderBetween(@Param("newOrder") long newOrder, @Param("curOrder") long curOrder);
+            "WHERE l.listOrder <= :newOrder AND l.listOrder > :curOrder AND l.board.id = :boardId")
+    void decreaseListOrderBetween(@Param("newOrder") long newOrder, @Param("curOrder") long curOrder, @Param("boardId") long boardId);
 
     Optional<Lists> findByIdAndBoardId(Long listId, Long boardId);
 
