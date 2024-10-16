@@ -65,4 +65,6 @@ public class Card {
     public void changeInfo(String info) { this.info = info; }
     public void changeDue(LocalDate due) { this.due = due; }
     public void plusViewCount() {this.viewCount ++;}
+    public void changeViewCount(Long viewCount) {
+        this.viewCount = viewCount;}
 }

@@ -1,0 +1,41 @@
+package jpabook.trello_project.domain.card.service;
+
+import jpabook.trello_project.domain.card.entity.Card;
+import jpabook.trello_project.domain.card.repository.CardRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
+
+@Service
+@RequiredArgsConstructor
+public class ViewCountSyncService {
+
+    private final RedisTemplate<String, String> redisTemplate;
+    private final CardRepository cardRepository;
+
+    // 캐시에 있는 카드 조회수를 1분마다 db에 반영
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    @Transactional
+    public void syncViewCountsToDB() {
+        Set<String> keys = redisTemplate.keys(CardService.CARD_VIEW_COUNT_PREFIX + "*");
+        if (keys != null) {
+            for (String key : keys) {
+                Long cardId = extractPostIdFromKey(key);
+                String viewCountStr = redisTemplate.opsForValue().get(key);
+                if (viewCountStr != null) {
+                    Long viewCount = Long.parseLong(viewCountStr);
+                    Card card = cardRepository.findById(cardId).orElse(null);
+                    if (card != null) card.changeViewCount(viewCount);
+                }
+            }
+        }
+    }
+
+    private Long extractPostIdFromKey(String key) {
+        return Long.parseLong(key.split(":")[2]);
+    }
+}
