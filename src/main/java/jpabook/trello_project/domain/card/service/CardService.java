@@ -6,14 +6,13 @@ import jpabook.trello_project.domain.board.entity.Board;
 import jpabook.trello_project.domain.board.repository.BoardRepository;
 import jpabook.trello_project.domain.card.dto.CardSearchCondition;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
+import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
+import jpabook.trello_project.domain.card.dto.response.CardRankResponseDto;
 import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
 import jpabook.trello_project.domain.card.dto.response.CardSearchResponse;
 import jpabook.trello_project.domain.card.dto.response.GetCardResponseDto;
-import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.repository.CardRepository;
-import jpabook.trello_project.domain.card_views.entity.CardViews;
-import jpabook.trello_project.domain.card_views.service.CardViewsService;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.ApiException;
 import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
@@ -35,7 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,24 +62,20 @@ public class CardService {
 
     @Transactional
     public CardResponseDto createCard(CreateCardRequestDto requestDto, Long workId, Long listId, AuthUser authUser) {
-        log.info("::: 카드 저장 로직 동작 :::");
         // 멤버 로직 검사
         WorkspaceMember workspaceMember = checkMemberExist(authUser.getId(), workId);
         // 멤버 권한 검사
         validateWorkRole(workspaceMember.getWorkRole());
 
-        log.info("::: lists 반환 로직 동작 :::");
         Lists list = listRepository.findById(listId).orElseThrow(() -> new InvalidRequestException("해당 리스트가 없습니다!"));
 
         Card card = new Card(requestDto, list);
         Card createCard = cardRepository.save(card);
-        log.info("::: 카드 저장 로직 완료 :::");
         return new CardResponseDto(createCard);
     }
 
     @Transactional
     public CardResponseDto modifyCard(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) {
-        log.info("::: 카드 수정 로직 동작 :::");
 
         // 카드 존재 유무 검사
         Card card = checkCardExist(id);
@@ -98,7 +93,6 @@ public class CardService {
             card.changeDue(requestDto.getDue());
         }
         Card newCard = cardRepository.save(card);
-        log.info("::: 카드 수정 로직 완료 :::");
         return new CardResponseDto(newCard);
     }
 
@@ -136,18 +130,18 @@ public class CardService {
         Card card = checkCardExist(cardId);
 
         Long viewCount;
-        // 어뷰징 방지: 동일 사용자가 일정 시간 내에 다시 조회할 때는 조회수 증가시키지 않음
         String userCardViewKey = CARD_USER_VIEW_PREFIX + user.getId() + ":" + cardId;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(userCardViewKey))) {
-            // 조회수 증가 로직
+            // 조회수 증가
             viewCount = incrementViewCount(card);
-            // 조회 기록 저장 (5초 동안 조회수 증가 방지)
+            // 5초 동안 중복 조회 방지
             redisTemplate.opsForValue().set(userCardViewKey, true, Duration.ofSeconds(5));
+            // 상위 랭킹 업데이트
+            updateTopRankings(card);
         } else {
             viewCount = getViewCount(card);
         }
 
-        log.info("카드 조회 완료");
         return new GetCardResponseDto(card, viewCount);
     }
 
@@ -174,41 +168,55 @@ public class CardService {
         return currentViewCount;
     }
 
-    private void updateTopRankings(Long cardId) {
-        String redisKey = CARD_VIEW_COUNT_PREFIX + cardId;
-        Long viewCount = (Long) redisTemplate.opsForValue().get(redisKey);
+    private void updateTopRankings(Card card) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + card.getId();
+        Long viewCount = getViewCount(card);
 
-        // Redis에 저장된 상위 카드 목록을 가져옴
-        List<Long> topRankings = (List<Long>) redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
-        if (topRankings == null) {
-            topRankings = List.of();
+        // Redis에서 상위 5개의 카드 랭킹 가져오기
+        Object cache = redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
+        List<Long> topRankings;
+        if (cache instanceof List<?>) {
+            topRankings = (List<Long>) cache;
+        } else {
+            topRankings = new ArrayList<>();
         }
 
-        // 상위 5위 카드에 포함되어 있지 않으면 추가
-        if (!topRankings.contains(cardId) && topRankings.size() < 5) {
-            topRankings.add(cardId);
-        }
+        // 현재 카드를 상위 랭킹 목록에서 제거하고 다시 추가
+        topRankings.remove(card.getId());
+        topRankings.add(card.getId());
 
-        // 조회수로 정렬 후 상위 5위만 유지
+        // 조회수에 따라 정렬 후 상위 5개만 유지
         topRankings = topRankings.stream()
-                .sorted((c1, c2) -> Long.compare(
-                        (Long) redisTemplate.opsForValue().get(CARD_VIEW_COUNT_PREFIX + c2),
-                        (Long) redisTemplate.opsForValue().get(CARD_VIEW_COUNT_PREFIX + c1)
-                ))
+                .sorted((c1, c2) -> Long.compare(getViewCount(cardRepository.findById(c2).orElseThrow()),
+                        getViewCount(cardRepository.findById(c1).orElseThrow())))
                 .limit(5)
                 .collect(Collectors.toList());
 
+        // Redis에 상위 랭킹 업데이트
         redisTemplate.opsForValue().set(CARD_TOP_RANKINGS, topRankings);
     }
 
-    public List<Long> getTopRankings() {
-        return (List<Long>) redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
-    }
 
+    public List<CardRankResponseDto> getTop5Cards(Long workId, Long boardId, Long listId) {
+        // Redis에서 상위 랭킹 조회
+        List<Long> topRankings = (List<Long>) redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
+        if (topRankings == null || topRankings.isEmpty()) {
+            throw new InvalidRequestException("상위 카드가 없습니다.");
+        }
+
+        // 카드 정보를 순서대로 조회하여 DTO로 반환
+        List<CardRankResponseDto> topCardDtos = new ArrayList<>();
+        for (Long cardId : topRankings) {
+            Card card = cardRepository.findById(cardId)
+                    .orElseThrow(() -> new InvalidRequestException("해당 카드가 존재하지 않습니다. 카드 ID: " + cardId));
+            topCardDtos.add(new CardRankResponseDto(card));
+        }
+
+        return topCardDtos;
+    }
 
     @Transactional
     public void deleteCard(Long id, Long workId, AuthUser authUser) {
-        log.info("::: 카드 삭제 로직 동작 :::");
 
         Card card = checkCardExist(id);
         // 멤버 존재 검사
@@ -217,18 +225,15 @@ public class CardService {
         validateWorkRole(workspaceMember.getWorkRole());
 
         cardRepository.deleteById(card.getId());
-        log.info("::: 카드 삭제 로직 완료 :::");
     }
 
 
     private Card checkCardExist(Long id) {
-        log.info("::: 카드 존재 여부 검사 로직 동작 :::");
         return cardRepository.findById(id)
                 .orElseThrow(() -> new InvalidRequestException("해당 카드가 없습니다!"));
     }
 
     private WorkspaceMember checkMemberExist(Long id, Long workId) {
-        log.info("::: 회원 -> 멤버 검사 로직 동작 :::");
         return workspaceMemberRepository.findByUserIdAndWorkspaceId(id, workId)
                 .orElseThrow(() -> new InvalidRequestException("해당 멤버가 없습니다!"));
     }
