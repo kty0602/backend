@@ -111,8 +111,7 @@ class CardServiceTest {
         executorService.shutdown();     // 스레드 풀 종료
 
         long end = System.currentTimeMillis();
-        log.info("총 소요 시간 : {}", end - start);
-        System.out.println("총 소요 시간 : " + (end - start));
+        log.info("::::: 총 소요 시간 : {} :::::", end - start);
     }
     
     @Test
@@ -139,8 +138,7 @@ class CardServiceTest {
         executorService.shutdown();
 
         long end = System.currentTimeMillis();
-        log.info("총 소요 시간 : {}", end - start);
-        System.out.println("총 소요 시간 : " + (end - start));
+        log.info("::::: 총 소요 시간 : {} :::::", end - start);
     }
 
     @Test
@@ -170,7 +168,33 @@ class CardServiceTest {
         executorService.shutdown();
 
         long end = System.currentTimeMillis();
-        log.info("총 소요 시간 : {}", end - start);
-        System.out.println("총 소요 시간 : " + (end - start));
+        log.info("::::: 총 소요 시간 : {} :::::", end - start);
+    }
+
+    @Test
+    public void testWithNamedLock() throws InterruptedException {
+        long start = System.currentTimeMillis();
+
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            String newTitle = "title" + i;
+            String newInfo = "info" + i;
+            executorService.execute(() -> {
+                try {
+                    lockCardService.modifyCardWithNamedLock(1L, new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()), 1L, authUser);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        long end = System.currentTimeMillis();
+        log.info("::::: 총 소요 시간 : {} :::::", end - start);
     }
 }

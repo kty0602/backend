@@ -4,6 +4,7 @@ import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
 import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.repository.CardRepository;
+import jpabook.trello_project.domain.card.repository.LockRepository;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.InvalidRequestException;
 import jpabook.trello_project.domain.workspace_member.entity.WorkspaceMember;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -24,6 +26,7 @@ public class LockCardService {
 
     private final CardRepository cardRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final LockRepository lockRepository;
 
     @Transactional
     public CardResponseDto modifyCardWithPessimisticLock(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) {
@@ -51,7 +54,20 @@ public class LockCardService {
                 Thread.sleep(50);
             }
         }
+    }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CardResponseDto modifyCardWithNamedLock(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) {
+        log.info("::: 분산 락을 사용한 카드 수정 :::");
+        Card card = cardRepository.findByIdWithPessimisticLock(id)
+                .orElseThrow(() -> new InvalidRequestException("해당 카드가 없습니다!"));
+
+        try {
+            lockRepository.getLock(id.toString());
+            return getModifiedCardResponseDto(requestDto, workId, authUser, card);
+        } finally {
+            lockRepository.releaseLock(id.toString());
+        }
     }
 
     @NotNull
