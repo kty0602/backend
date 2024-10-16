@@ -56,7 +56,7 @@ public class CardController {
             @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @AuthenticationPrincipal AuthUser authUser) {
-        GetCardResponseDto responseDto = cardService.getCard(cardId, workId, authUser);
+        GetCardResponseDto responseDto = cardService.getCard(cardId, workId, boardId,listId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, responseDto));
     }

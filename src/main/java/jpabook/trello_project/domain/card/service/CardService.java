@@ -123,41 +123,40 @@ public class CardService {
 
 
     @Transactional
-    public GetCardResponseDto getCard(Long cardId, Long workId, AuthUser authUser) {
+    public GetCardResponseDto getCard(Long cardId, Long workId, Long boardId, Long listId, AuthUser authUser) {
         User user = userService.findByEmail(authUser.getEmail());
         checkMemberExist(authUser.getId(), workId);
 
         Card card = checkCardExist(cardId);
 
         Long viewCount;
-        String userCardViewKey = CARD_USER_VIEW_PREFIX + user.getId() + ":" + cardId;
+        String userCardViewKey = CARD_USER_VIEW_PREFIX + user.getId() + ":" + workId + ":" + boardId + ":" + listId + ":" + cardId;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(userCardViewKey))) {
             // 조회수 증가
-            viewCount = incrementViewCount(card);
+            viewCount = incrementViewCount(card, workId, boardId, listId);
             // 5초 동안 중복 조회 방지
             redisTemplate.opsForValue().set(userCardViewKey, true, Duration.ofSeconds(5));
             // 상위 랭킹 업데이트
-            updateTopRankings(card);
+            updateTopRankings(card, workId, boardId, listId);
         } else {
-            viewCount = getViewCount(card);
+            viewCount = getViewCount(card, workId, boardId, listId);
         }
 
         return new GetCardResponseDto(card, viewCount);
     }
 
-    private Long incrementViewCount(Card card) {
-        String redisKey = CARD_VIEW_COUNT_PREFIX + card.getId();
-        Long currentViewCount = getViewCount(card);
+    private Long incrementViewCount(Card card, Long workId, Long boardId, Long listId) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + workId + ":" + boardId + ":" + listId + ":" + card.getId();
+        Long currentViewCount = getViewCount(card, workId, boardId, listId);
         // Redis에 조회수 1 증가
         redisTemplate.opsForValue().set(redisKey, currentViewCount + 1);
         return currentViewCount + 1;
     }
 
-    private Long getViewCount(Card card) {
-        String redisKey = CARD_VIEW_COUNT_PREFIX + card.getId();
+    private Long getViewCount(Card card, Long workId, Long boardId, Long listId) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + workId + ":" + boardId + ":" + listId + ":" + card.getId();
 
-        // redis 조회시 miss인 경우 db에 있는 값 꺼내고 캐시에 set
-        // hit인 경우 캐싱된 데이터 사용
+        // Redis에서 조회 후 miss일 경우 DB에서 조회
         Long currentViewCount;
         Object cache = redisTemplate.opsForValue().get(redisKey);
         if (cache == null) {
@@ -168,12 +167,12 @@ public class CardService {
         return currentViewCount;
     }
 
-    private void updateTopRankings(Card card) {
-        String redisKey = CARD_VIEW_COUNT_PREFIX + card.getId();
-        Long viewCount = getViewCount(card);
+    private void updateTopRankings(Card card, Long workId, Long boardId, Long listId) {
+        String rankingKey = CARD_TOP_RANKINGS + workId + ":" + boardId + ":" + listId;
+        Long viewCount = getViewCount(card, workId, boardId, listId);
 
-        // Redis에서 상위 5개의 카드 랭킹 가져오기
-        Object cache = redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
+        // Redis에서 해당 workId, boardId, listId에 맞는 상위 5개의 카드 랭킹 가져오기
+        Object cache = redisTemplate.opsForValue().get(rankingKey);
         List<Long> topRankings;
         if (cache instanceof List<?>) {
             topRankings = (List<Long>) cache;
@@ -187,19 +186,22 @@ public class CardService {
 
         // 조회수에 따라 정렬 후 상위 5개만 유지
         topRankings = topRankings.stream()
-                .sorted((c1, c2) -> Long.compare(getViewCount(cardRepository.findById(c2).orElseThrow()),
-                        getViewCount(cardRepository.findById(c1).orElseThrow())))
+                .sorted((c1, c2) -> Long.compare(getViewCount(cardRepository.findById(c2).orElseThrow(),
+                                workId, boardId, listId),
+                        getViewCount(cardRepository.findById(c1).orElseThrow(),
+                                workId, boardId, listId)))
                 .limit(5)
                 .collect(Collectors.toList());
 
         // Redis에 상위 랭킹 업데이트
-        redisTemplate.opsForValue().set(CARD_TOP_RANKINGS, topRankings);
+        redisTemplate.opsForValue().set(rankingKey, topRankings);
     }
 
 
     public List<CardRankResponseDto> getTop5Cards(Long workId, Long boardId, Long listId) {
         // Redis에서 상위 랭킹 조회
-        List<Long> topRankings = (List<Long>) redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
+        String rankingKey = CARD_TOP_RANKINGS + workId + ":" + boardId + ":" + listId;
+        List<Long> topRankings = (List<Long>) redisTemplate.opsForValue().get(rankingKey);
         if (topRankings == null || topRankings.isEmpty()) {
             throw new InvalidRequestException("상위 카드가 없습니다.");
         }
