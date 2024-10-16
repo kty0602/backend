@@ -53,7 +53,7 @@ public class CardService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String CARD_VIEW_COUNT_PREFIX = "card:viewcount:";
+    public static final String CARD_VIEW_COUNT_PREFIX = "card:viewcount:";
     private static final String CARD_USER_VIEW_PREFIX = "card:user:view:";
     private static final String CARD_TOP_RANKINGS = "card:toprankings";
 
@@ -135,28 +135,43 @@ public class CardService {
 
         Card card = checkCardExist(cardId);
 
+        Long viewCount;
         // 어뷰징 방지: 동일 사용자가 일정 시간 내에 다시 조회할 때는 조회수 증가시키지 않음
         String userCardViewKey = CARD_USER_VIEW_PREFIX + user.getId() + ":" + cardId;
         if (Boolean.FALSE.equals(redisTemplate.hasKey(userCardViewKey))) {
             // 조회수 증가 로직
-            incrementViewCount(cardId);
+            viewCount = incrementViewCount(card);
             // 조회 기록 저장 (5초 동안 조회수 증가 방지)
             redisTemplate.opsForValue().set(userCardViewKey, true, Duration.ofSeconds(5));
+        } else {
+            viewCount = getViewCount(card);
         }
 
         log.info("카드 조회 완료");
-        return new GetCardResponseDto(card);
+        return new GetCardResponseDto(card, viewCount);
     }
 
-    private void incrementViewCount(Long cardId) {
-        String redisKey = CARD_VIEW_COUNT_PREFIX + cardId;
-
-        // Redis에서 조회수를 읽을 때 기본값 0L을 사용하고 명시적으로 Long으로 변환
-        Long currentViewCount = redisTemplate.opsForValue().get(redisKey) != null ?
-                Long.valueOf(redisTemplate.opsForValue().get(redisKey).toString()) : 0L;
-
+    private Long incrementViewCount(Card card) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + card.getId();
+        Long currentViewCount = getViewCount(card);
         // Redis에 조회수 1 증가
         redisTemplate.opsForValue().set(redisKey, currentViewCount + 1);
+        return currentViewCount + 1;
+    }
+
+    private Long getViewCount(Card card) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + card.getId();
+
+        // redis 조회시 miss인 경우 db에 있는 값 꺼내고 캐시에 set
+        // hit인 경우 캐싱된 데이터 사용
+        Long currentViewCount;
+        Object cache = redisTemplate.opsForValue().get(redisKey);
+        if (cache == null) {
+            currentViewCount = card.getViewCount();
+        } else {
+            currentViewCount = Long.parseLong(cache.toString());
+        }
+        return currentViewCount;
     }
 
     private void updateTopRankings(Long cardId) {
