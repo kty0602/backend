@@ -6,14 +6,12 @@ import jpabook.trello_project.domain.board.entity.Board;
 import jpabook.trello_project.domain.board.repository.BoardRepository;
 import jpabook.trello_project.domain.card.dto.CardSearchCondition;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
+import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
 import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
 import jpabook.trello_project.domain.card.dto.response.CardSearchResponse;
 import jpabook.trello_project.domain.card.dto.response.GetCardResponseDto;
-import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.repository.CardRepository;
-import jpabook.trello_project.domain.card_views.entity.CardViews;
-import jpabook.trello_project.domain.card_views.service.CardViewsService;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.ApiException;
 import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
@@ -35,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
