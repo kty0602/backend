@@ -70,15 +70,9 @@ public class LockCardService {
         if(requestDto.getDue() != null) {
             card.changeDue(requestDto.getDue());
         }
-        Card newCard = cardRepository.save(card);
+        Card newCard = cardRepository.saveAndFlush(card);
         log.info("::: 카드 수정 로직 완료 :::");
         return new CardResponseDto(newCard);
-    }
-
-    private Card checkCardExist(Long id) {
-        log.info("::: 카드 존재 여부 검사 로직 동작 :::");
-        return cardRepository.findById(id)
-                .orElseThrow(() -> new InvalidRequestException("해당 카드가 없습니다!"));
     }
 
     private WorkspaceMember checkMemberExist(Long id, Long workId) {
