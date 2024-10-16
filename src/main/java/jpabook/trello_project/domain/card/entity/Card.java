@@ -1,5 +1,11 @@
 package jpabook.trello_project.domain.card.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.persistence.*;
 import jpabook.trello_project.domain.attachment.entity.Attachment;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
@@ -28,6 +34,8 @@ public class Card {
     @Column(length = 100)
     private String info;
     @Column(length = 50)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate due;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lists_id", nullable = false)

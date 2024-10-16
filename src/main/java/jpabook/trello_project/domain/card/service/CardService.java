@@ -30,11 +30,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,7 +49,14 @@ public class CardService {
     private final ListRepository listRepository;
     private final BoardRepository boardRepository;
     private final UserService userService;
-    private final CardViewsService cardViewsService;
+
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String CARD_VIEW_COUNT_PREFIX = "card:viewcount:";
+    private static final String CARD_USER_VIEW_PREFIX = "card:user:view:";
+    private static final String CARD_TOP_RANKINGS = "card:toprankings";
+
 
     @PersistenceContext
     EntityManager entityManager;
@@ -117,32 +127,69 @@ public class CardService {
         ));
     }
 
+
     @Transactional
-    public GetCardResponseDto getCard(Long id, Long workId, AuthUser authUser) {
-        log.info("::: 카드 수정 조회 동작 :::");
-        // 유저 정보 가져오기
+    public GetCardResponseDto getCard(Long cardId, Long workId, AuthUser authUser) {
         User user = userService.findByEmail(authUser.getEmail());
-
-        // 멤버 존재 검사 -> 이후 권한 검사 불필요
         checkMemberExist(authUser.getId(), workId);
-        // 카드 존재 유무 검사
-        Card card = checkCardExist(id);
 
-        // 어뷰징 방지 로직
-        CardViews history = cardViewsService.findByUserAndCard(user, card);
+        Card card = checkCardExist(cardId);
 
-        // 조회 기록이 없거나 마지막 조회 기록이 10분 이상 지난 경우
-        if (history == null
-                || Duration.between(history.getCreatedAt(), LocalDateTime.now()).getSeconds() > 600) {
-            card.plusViewCount();
-            updateRanking();
-            entityManager.flush(); // 네이티브 쿼리 사용 후 엔티티 매니저 동기화
-            cardViewsService.save(user, card);
+        // 어뷰징 방지: 동일 사용자가 일정 시간 내에 다시 조회할 때는 조회수 증가시키지 않음
+        String userCardViewKey = CARD_USER_VIEW_PREFIX + user.getId() + ":" + cardId;
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(userCardViewKey))) {
+            // 조회수 증가 로직
+            incrementViewCount(cardId);
+            // 조회 기록 저장 (5초 동안 조회수 증가 방지)
+            redisTemplate.opsForValue().set(userCardViewKey, true, Duration.ofSeconds(5));
         }
 
-        log.info("::: 카드 수정 조회 완료 :::");
+        log.info("카드 조회 완료");
         return new GetCardResponseDto(card);
     }
+
+    private void incrementViewCount(Long cardId) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + cardId;
+
+        // Redis에서 조회수를 읽을 때 기본값 0L을 사용하고 명시적으로 Long으로 변환
+        Long currentViewCount = redisTemplate.opsForValue().get(redisKey) != null ?
+                Long.valueOf(redisTemplate.opsForValue().get(redisKey).toString()) : 0L;
+
+        // Redis에 조회수 1 증가
+        redisTemplate.opsForValue().set(redisKey, currentViewCount + 1);
+    }
+
+    private void updateTopRankings(Long cardId) {
+        String redisKey = CARD_VIEW_COUNT_PREFIX + cardId;
+        Long viewCount = (Long) redisTemplate.opsForValue().get(redisKey);
+
+        // Redis에 저장된 상위 카드 목록을 가져옴
+        List<Long> topRankings = (List<Long>) redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
+        if (topRankings == null) {
+            topRankings = List.of();
+        }
+
+        // 상위 5위 카드에 포함되어 있지 않으면 추가
+        if (!topRankings.contains(cardId) && topRankings.size() < 5) {
+            topRankings.add(cardId);
+        }
+
+        // 조회수로 정렬 후 상위 5위만 유지
+        topRankings = topRankings.stream()
+                .sorted((c1, c2) -> Long.compare(
+                        (Long) redisTemplate.opsForValue().get(CARD_VIEW_COUNT_PREFIX + c2),
+                        (Long) redisTemplate.opsForValue().get(CARD_VIEW_COUNT_PREFIX + c1)
+                ))
+                .limit(5)
+                .collect(Collectors.toList());
+
+        redisTemplate.opsForValue().set(CARD_TOP_RANKINGS, topRankings);
+    }
+
+    public List<Long> getTopRankings() {
+        return (List<Long>) redisTemplate.opsForValue().get(CARD_TOP_RANKINGS);
+    }
+
 
     @Transactional
     public void deleteCard(Long id, Long workId, AuthUser authUser) {
@@ -158,11 +205,6 @@ public class CardService {
         log.info("::: 카드 삭제 로직 완료 :::");
     }
 
-    private void updateRanking() {
-        // 상위 5위까지 저장
-        cardRepository.initRankings();
-        cardRepository.updateRankings();
-    }
 
     private Card checkCardExist(Long id) {
         log.info("::: 카드 존재 여부 검사 로직 동작 :::");

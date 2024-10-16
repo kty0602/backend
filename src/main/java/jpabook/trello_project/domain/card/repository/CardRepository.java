@@ -29,4 +29,8 @@ public interface CardRepository extends JpaRepository<Card, Long>, CardRepositor
           nativeQuery = true
   )
   void initRankings();
+
+    List<Card> findTop5ByOrderByViewCountDesc();
+
+  List<Card> findTop5ByList_Board_Workspace_IdAndList_Board_IdAndList_IdOrderByViewCountDesc(Long workspaceId, Long boardId, Long listId);
 }
