@@ -20,6 +20,7 @@ public class GetCardResponseDto {
     private List<AttachmentResponseDto> attachmentList;
     private List<ReplyResponseDto> replyList;
     private List<GetManagerResopnseDto> managers;
+    private Long viewCount;
 
     public GetCardResponseDto(Card card) {
         this.id = card.getId();
@@ -35,6 +36,7 @@ public class GetCardResponseDto {
         this.managers = card.getManagers().stream()
                 .map(GetManagerResopnseDto::new)
                 .collect(Collectors.toList());
+        this.viewCount = card.getViewCount();
     }
 
 }

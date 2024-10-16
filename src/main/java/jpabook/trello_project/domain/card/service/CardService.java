@@ -1,5 +1,7 @@
 package jpabook.trello_project.domain.card.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jpabook.trello_project.domain.board.entity.Board;
 import jpabook.trello_project.domain.board.repository.BoardRepository;
 import jpabook.trello_project.domain.card.dto.CardSearchCondition;
@@ -10,6 +12,8 @@ import jpabook.trello_project.domain.card.dto.response.GetCardResponseDto;
 import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.repository.CardRepository;
+import jpabook.trello_project.domain.card_views.entity.CardViews;
+import jpabook.trello_project.domain.card_views.service.CardViewsService;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.exceptions.ApiException;
 import jpabook.trello_project.domain.common.exceptions.ErrorStatus;
@@ -29,6 +33,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,6 +46,10 @@ public class CardService {
     private final ListRepository listRepository;
     private final BoardRepository boardRepository;
     private final UserService userService;
+    private final CardViewsService cardViewsService;
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Transactional
     public CardResponseDto createCard(CreateCardRequestDto requestDto, Long workId, Long listId, AuthUser authUser) {
@@ -106,12 +117,28 @@ public class CardService {
         ));
     }
 
+    @Transactional
     public GetCardResponseDto getCard(Long id, Long workId, AuthUser authUser) {
         log.info("::: 카드 수정 조회 동작 :::");
+        // 유저 정보 가져오기
+        User user = userService.findByEmail(authUser.getEmail());
+
         // 멤버 존재 검사 -> 이후 권한 검사 불필요
         checkMemberExist(authUser.getId(), workId);
         // 카드 존재 유무 검사
         Card card = checkCardExist(id);
+
+        // 어뷰징 방지 로직
+        CardViews history = cardViewsService.findByUserAndCard(user, card);
+
+        // 조회 기록이 없거나 마지막 조회 기록이 10분 이상 지난 경우
+        if (history == null
+                || Duration.between(history.getCreatedAt(), LocalDateTime.now()).getSeconds() > 600) {
+            card.plusViewCount();
+            updateRanking();
+            entityManager.flush(); // 네이티브 쿼리 사용 후 엔티티 매니저 동기화
+            cardViewsService.save(user, card);
+        }
 
         log.info("::: 카드 수정 조회 완료 :::");
         return new GetCardResponseDto(card);
@@ -129,6 +156,12 @@ public class CardService {
 
         cardRepository.deleteById(card.getId());
         log.info("::: 카드 삭제 로직 완료 :::");
+    }
+
+    private void updateRanking() {
+        // 상위 5위까지 저장
+        cardRepository.initRankings();
+        cardRepository.updateRankings();
     }
 
     private Card checkCardExist(Long id) {

@@ -38,6 +38,8 @@ public class Card {
     private List<Reply> replyList = new ArrayList<>();
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Manager> managers = new ArrayList<>();
+    private Long viewCount;
+    private int rnk;
 
     // lists 집어넣는거 아직 추가 안됨
     public Card(CreateCardRequestDto requestDto, Lists list) {
@@ -48,10 +50,11 @@ public class Card {
         this.attachmentList = new ArrayList<>();
         this.replyList = new ArrayList<>();
         this.managers = new ArrayList<>();
+        this.viewCount = 0L;
     }
 
     public void changeTitle(String title) { this.title = title; }
     public void changeInfo(String info) { this.info = info; }
     public void changeDue(LocalDate due) { this.due = due; }
-
+    public void plusViewCount() {this.viewCount ++;}
 }
