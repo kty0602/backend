@@ -29,6 +29,8 @@ public class Card {
     private String info;
     @Column(length = 50)
     private LocalDate due;
+    @Version
+    private Long version;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lists_id", nullable = false)
     private Lists list;
