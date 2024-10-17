@@ -59,7 +59,13 @@ Trello는 프로젝트 관리를 위한 협업 툴로, 직관적인 칸반 보�
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
 
 ## 와이어프레임
+![](https://github.com/SemiFinalPJ/backend/blob/dev/src/img/%EC%99%80%EC%9D%B4%EC%96%B4%20%ED%94%84%EB%A0%88%EC%9E%84.png)
 
 ## API 명세서
+| API 명세 | API 명세  | API 명세 | API 명세 |
+| :------------: | :------------: |:------------:|:------------:|
+|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B81.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B82.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B83.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B84.png" width="300" height="200"/>|
+
 
 ## ERD
+![](https://github.com/SemiFinalPJ/backend/blob/dev/src/img/ERD.png)
