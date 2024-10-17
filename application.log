@@ -127,3 +127,79 @@ Comment: comment!
 }] with org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 2024-10-17T22:51:44.311+09:00 DEBUG 7156 --- [trello_project] [task-1] o.s.web.client.RestTemplate              : Response 200 OK
 2024-10-17T22:51:44.313+09:00 DEBUG 7156 --- [trello_project] [task-1] o.s.web.client.RestTemplate              : Reading to [java.lang.String] as "text/html"
+2024-10-17T23:01:46.058+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /workspaces/1/boards/1/lists/1/card/1/replies
+2024-10-17T23:01:46.060+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /workspaces/1/boards/1/lists/1/card/1/replies
+2024-10-17T23:01:46.060+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : POST "/workspaces/1/boards/1/lists/1/card/1/replies", parameters={}
+2024-10-17T23:01:46.060+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to jpabook.trello_project.domain.reply.controller.ReplyController#createReply(Long, Long, Long, Long, CreateReplyRequestDto, AuthUser)
+2024-10-17T23:01:46.061+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [jpabook.trello_project.domain.reply.dto.request.CreateReplyRequestDto@603006dc]
+2024-10-17T23:01:46.063+09:00  INFO 7156 --- [trello_project] [http-nio-8080-exec-4] j.t.domain.reply.service.ReplyService    : ::: 댓글 저장 로직 동작 :::
+2024-10-17T23:01:46.065+09:00  INFO 7156 --- [trello_project] [http-nio-8080-exec-4] j.t.domain.reply.service.ReplyService    : ::: 카드 존재 여부 검사 로직 동작 :::
+2024-10-17T23:01:46.066+09:00  INFO 7156 --- [trello_project] [http-nio-8080-exec-4] j.t.domain.reply.service.ReplyService    : ::: 회원 -> 멤버 검사 로직 동작 :::
+2024-10-17T23:01:46.071+09:00  INFO 7156 --- [trello_project] [http-nio-8080-exec-4] j.t.domain.reply.service.ReplyService    : ::: 댓글 저장 로직 완료 :::
+2024-10-17T23:01:46.079+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/cbor]
+2024-10-17T23:01:46.079+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [jpabook.trello_project.domain.common.dto.ResponseDto@5333b691]
+2024-10-17T23:01:46.080+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 201 CREATED
+2024-10-17T23:01:46.081+09:00 DEBUG 7156 --- [trello_project] [task-2] o.s.web.client.RestTemplate              : HTTP POST https://hooks.slack.com/services/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
+2024-10-17T23:01:46.081+09:00 DEBUG 7156 --- [trello_project] [task-2] o.s.web.client.RestTemplate              : Accept=[text/plain, application/json, application/cbor, application/*+json, */*]
+2024-10-17T23:01:46.082+09:00 DEBUG 7156 --- [trello_project] [task-2] o.s.web.client.RestTemplate              : Writing [{text=A new reply has been added!
+User Id: 1
+Card Id: 1
+Comment: comment!😀
+}] with org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+2024-10-17T23:01:46.411+09:00 DEBUG 7156 --- [trello_project] [task-2] o.s.web.client.RestTemplate              : Response 404 NOT_FOUND
+2024-10-17T23:01:46.416+09:00 ERROR 7156 --- [trello_project] [task-2] .a.i.SimpleAsyncUncaughtExceptionHandler : Unexpected exception occurred invoking async method: public void jpabook.trello_project.client.SlackNotifier.sendSlackMessage(java.lang.String)
+
+org.springframework.web.client.HttpClientErrorException$NotFound: 404 Not Found: "no_service"
+	at org.springframework.web.client.HttpClientErrorException.create(HttpClientErrorException.java:112) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:183) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:137) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.ResponseErrorHandler.handleError(ResponseErrorHandler.java:63) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.RestTemplate.handleResponse(RestTemplate.java:942) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:891) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:790) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.client.RestTemplate.postForObject(RestTemplate.java:507) ~[spring-web-6.1.13.jar:6.1.13]
+	at jpabook.trello_project.client.SlackNotifier.sendSlackMessage(SlackNotifier.java:24) ~[main/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.interceptor.AsyncExecutionInterceptor.lambda$invoke$0(AsyncExecutionInterceptor.java:113) ~[spring-aop-6.1.13.jar:6.1.13]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+
+2024-10-17T23:01:52.657+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing PATCH /workspaces/1/boards/1/lists/1/cards/1/replies/1
+2024-10-17T23:01:52.660+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured PATCH /workspaces/1/boards/1/lists/1/cards/1/replies/1
+2024-10-17T23:01:52.660+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : PATCH "/workspaces/1/boards/1/lists/1/cards/1/replies/1", parameters={}
+2024-10-17T23:01:52.660+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2024-10-17T23:01:52.661+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2024-10-17T23:01:52.662+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource workspaces/1/boards/1/lists/1/cards/1/replies/1.]
+2024-10-17T23:01:52.662+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2024-10-17T23:01:52.663+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing PATCH /error
+2024-10-17T23:01:52.663+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-5] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2024-10-17T23:04:14.390+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing PATCH /workspaces/1/boards/1/lists/1/cards/1/replies/1
+2024-10-17T23:04:14.393+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured PATCH /workspaces/1/boards/1/lists/1/cards/1/replies/1
+2024-10-17T23:04:14.394+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : PATCH "/workspaces/1/boards/1/lists/1/cards/1/replies/1", parameters={}
+2024-10-17T23:04:14.394+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2024-10-17T23:04:14.397+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2024-10-17T23:04:14.398+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource workspaces/1/boards/1/lists/1/cards/1/replies/1.]
+2024-10-17T23:04:14.398+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2024-10-17T23:04:14.399+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing PATCH /error
+2024-10-17T23:04:14.399+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-8] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2024-10-17T23:04:31.864+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /workspaces/1/boards/1/lists/1/cards/1/replies
+2024-10-17T23:04:31.868+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /workspaces/1/boards/1/lists/1/cards/1/replies
+2024-10-17T23:04:31.868+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : POST "/workspaces/1/boards/1/lists/1/cards/1/replies", parameters={}
+2024-10-17T23:04:31.868+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+2024-10-17T23:04:31.870+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
+2024-10-17T23:04:31.871+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource workspaces/1/boards/1/lists/1/cards/1/replies.]
+2024-10-17T23:04:31.871+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
+2024-10-17T23:04:31.872+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /error
+2024-10-17T23:04:31.872+09:00 DEBUG 7156 --- [trello_project] [http-nio-8080-exec-9] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2024-10-17T23:04:49.536+09:00  INFO 7156 --- [trello_project] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-10-17T23:04:49.537+09:00  INFO 7156 --- [trello_project] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-10-17T23:04:49.542+09:00  INFO 7156 --- [trello_project] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

@@ -22,8 +22,9 @@ import java.util.List;
 public class CardSearchController {
     private final CardService cardService;
 
-    @GetMapping("/boards/{boardId}/cards")
+    @GetMapping("/workspaces/{workId}/boards/{boardId}/cards")
     public ResponseDto<Page<CardSearchResponse>> search(@AuthenticationPrincipal AuthUser authUser,
+                                                        @PathVariable Long workId,
                                                         @PathVariable Long boardId,
                                                         @RequestParam(defaultValue = "1") int page,
                                                         @RequestParam(defaultValue = "10") int size,
