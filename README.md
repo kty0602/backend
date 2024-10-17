@@ -19,10 +19,7 @@ Trello는 프로젝트 관리를 위한 협업 툴로, 직관적인 칸반 보�
 
 ## 팀소개
 
-[강태영](https://github.com/kty0602)
-[정은교](https://github.com/ekj1003)
-[김아름](https://github.com/areum0116)
-[황인서](https://github.com/inseooo0)
+|[@강태영](https://github.com/kty0602)|[@정은교](https://github.com/ekj1003)|[@김아름](https://github.com/areum0116)|[@황인서](https://github.com/inseooo0)
 
 ### [팀 노션](https://teamsparta.notion.site/14-fcb0547f0e6b41dab956f85ac8ee21d1)
 
