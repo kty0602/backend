@@ -26,7 +26,7 @@ Trello는 프로젝트 관리를 위한 협업 툴로, 직관적인 칸반 보�
 
 ## 💜 주요기능
 
-- 동시성 제어
+- LOCK을 활용한 동시성 제어
 
 - Redis를 활용한 캐시 전략
 
@@ -70,7 +70,6 @@ Trello는 프로젝트 관리를 위한 협업 툴로, 직관적인 칸반 보�
 | API 명세 | API 명세  | API 명세 | API 명세 |
 | :------------: | :------------: |:------------:|:------------:|
 |<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B81.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B82.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B83.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B84.png" width="300" height="200"/>|
-
 
 ## ERD
 ![](https://github.com/SemiFinalPJ/backend/blob/dev/src/img/ERD.png)
