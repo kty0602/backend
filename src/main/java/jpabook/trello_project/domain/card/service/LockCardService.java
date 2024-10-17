@@ -28,6 +28,8 @@ public class LockCardService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final LockRepository lockRepository;
 
+    private final static int MAX_RETRIES = 50;
+
     @Transactional
     public CardResponseDto modifyCardWithPessimisticLock(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) {
         log.info("::: 비관적 락을 사용한 카드 수정 :::");
@@ -43,7 +45,9 @@ public class LockCardService {
     public CardResponseDto modifyCardWithOptimisticLock(Long id, ModifyCardRequestDto requestDto, Long workId, AuthUser authUser) throws InterruptedException {
         log.info("::: 낙관적 락을 사용한 카드 수정 :::");
 
-        while(true) {
+        int retryCount = 0;
+        boolean success = false;
+        while(retryCount < MAX_RETRIES && !success) {
             try {
                 // 카드 존재 유무 검사
                 Card card = cardRepository.findByIdWithOptimisticLock(id)
@@ -51,9 +55,14 @@ public class LockCardService {
 
                 return getModifiedCardResponseDto(requestDto, workId, authUser, card);
             } catch (ObjectOptimisticLockingFailureException e) {
-                Thread.sleep(50);
+                retryCount++;
+                if(retryCount > MAX_RETRIES) {
+                    throw new RuntimeException("최대 재시도 횟수를 초과했습니다.", e);
+                }
+                Thread.sleep(100);
             }
         }
+        return null;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

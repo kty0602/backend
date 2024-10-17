@@ -14,6 +14,9 @@ import jpabook.trello_project.domain.user.enums.UserRole;
 import jpabook.trello_project.domain.user.repository.UserRepository;
 import jpabook.trello_project.domain.workspace.entity.Workspace;
 import jpabook.trello_project.domain.workspace.repository.WorkspaceRepository;
+import jpabook.trello_project.domain.workspace_member.entity.WorkspaceMember;
+import jpabook.trello_project.domain.workspace_member.enums.WorkRole;
+import jpabook.trello_project.domain.workspace_member.repository.WorkspaceMemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,24 +55,34 @@ class CardServiceTest {
     BoardRepository boardRepository;
     @Autowired
     WorkspaceRepository workspaceRepository;
+    @Autowired
+    WorkspaceMemberRepository workspaceMemberRepository;
+
+    int threadCount = 5;
 
     AuthUser authUser;
+    User savedUser;
+    Workspace savedWorkspace;
+    Board savedBoard;
+    Lists savedLists;
+    Card savedCard;
 
     @BeforeEach
     public void setUp() {
         authUser = new AuthUser(1L, "email@email.com", "name", UserRole.ROLE_ADMIN);
         User user = User.fromAuthUser(authUser);
-        userRepository.save(user);
-        Workspace workspace = new Workspace(user, "work title", "info");
-        workspaceRepository.save(workspace);
-        Board board = new Board(workspace, "board title", "blue", "imgUrl");
-        boardRepository.save(board);
-        Lists lists = new Lists(board, "lists title", 1);
-        lists = listRepository.save(lists);
+        savedUser = userRepository.save(user);
+        Workspace workspace = new Workspace(savedUser, "work title", "info");
+        savedWorkspace = workspaceRepository.save(workspace);
+        Board board = new Board(savedWorkspace, "board title", "blue", "imgUrl");
+        savedBoard = boardRepository.save(board);
+        Lists lists = new Lists(savedBoard, "lists title", 1);
+        savedLists = listRepository.save(lists);
+        workspaceMemberRepository.save(new WorkspaceMember(savedUser, savedWorkspace, WorkRole.ROLE_WORKSPACE));
 
         CreateCardRequestDto dto = new CreateCardRequestDto("title", "info", LocalDate.now());
-        Card card = new Card(dto, lists);
-        cardRepository.save(card);
+        Card card = new Card(dto, savedLists);
+        savedCard = cardRepository.save(card);
     }
 
     @AfterEach
@@ -89,7 +102,6 @@ class CardServiceTest {
     public void testWithoutLock() throws InterruptedException {
         long start = System.currentTimeMillis();
 
-        int threadCount = 100;
         // 32개의 스레드를 가진 스레드 풀 생성
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
@@ -99,7 +111,12 @@ class CardServiceTest {
             String newInfo = "info" + i;
             executorService.execute(() -> {
                 try {
-                    cardService.modifyCard(1L, new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()), 1L, authUser);
+                    cardService.modifyCard(
+                            savedCard.getId(),
+                            new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()),
+                            savedWorkspace.getId(),
+                            authUser
+                    );
                 } finally {
                     // 작업 마친 후 스레드 수 줄임.
                     latch.countDown();
@@ -118,7 +135,6 @@ class CardServiceTest {
     public void testWithPessimisticLock() throws InterruptedException {
         long start = System.currentTimeMillis();
 
-        int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -127,7 +143,12 @@ class CardServiceTest {
             String newInfo = "info" + i;
             executorService.execute(() -> {
                 try {
-                    lockCardService.modifyCardWithPessimisticLock(1L, new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()), 1L, authUser);
+                    lockCardService.modifyCardWithPessimisticLock(
+                            savedCard.getId(),
+                            new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()),
+                            savedWorkspace.getId(),
+                            authUser
+                    );
                 } finally {
                     latch.countDown();
                 }
@@ -144,8 +165,6 @@ class CardServiceTest {
     @Test
     public void testWithOptimisticLock() throws InterruptedException {
         long start = System.currentTimeMillis();
-
-        int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -154,11 +173,16 @@ class CardServiceTest {
             String newInfo = "info" + i;
             executorService.execute(() -> {
                 try {
-                    lockCardService.modifyCardWithOptimisticLock(1L, new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()), 1L, authUser);
+                    lockCardService.modifyCardWithOptimisticLock(
+                            savedCard.getId(),
+                            new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()),
+                            savedWorkspace.getId(),
+                            authUser
+                    );
                 } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
                     throw new RuntimeException(e);
-                }
-                finally {
+                } finally {
                     latch.countDown();
                 }
             });
@@ -175,7 +199,6 @@ class CardServiceTest {
     public void testWithNamedLock() throws InterruptedException {
         long start = System.currentTimeMillis();
 
-        int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -184,7 +207,12 @@ class CardServiceTest {
             String newInfo = "info" + i;
             executorService.execute(() -> {
                 try {
-                    lockCardService.modifyCardWithNamedLock(1L, new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()), 1L, authUser);
+                    lockCardService.modifyCardWithNamedLock(
+                            savedCard.getId(),
+                            new ModifyCardRequestDto(newTitle, newInfo, LocalDate.now()),
+                            savedWorkspace.getId(),
+                            authUser
+                    );
                 } finally {
                     latch.countDown();
                 }
