@@ -18,4 +18,11 @@ public class CardRankResponseDto {
         this.info = card.getInfo();
         this.viewCount = card.getViewCount();
     }
+
+    public CardRankResponseDto(Card card, Long viewCount) {
+        this.id = card.getId();
+        this.title = card.getTitle();
+        this.info = card.getInfo();
+        this.viewCount = viewCount;
+    }
 }

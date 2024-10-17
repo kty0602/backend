@@ -1,19 +1,15 @@
 package jpabook.trello_project.domain.card.service;
 
-import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
-import jpabook.trello_project.domain.lists.entity.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @SpringBootTest
 @Transactional
@@ -30,11 +26,7 @@ class CardServiceTest {
         List<Object[]> batchArgs = new ArrayList<>();
 
         for (int i = 0; i < totalCards; i++) {
-            String nickname = UUID.randomUUID().toString().substring(0, 7); // UUID로 유일한 닉네임 생성
-            String email = UUID.randomUUID().toString() + "@example.com";  // UUID로 유일한 이메일 생성
-            CreateCardRequestDto requestDto = new CreateCardRequestDto("title", "info", LocalDate.now());
-            Lists lists = new Lists();
-            ReflectionTestUtils.setField(lists, "id", 1L);
+
 
             batchArgs.add(new Object[]{LocalDate.now(), "info", "title", 1, 1});
 
@@ -45,9 +37,9 @@ class CardServiceTest {
             }
         }
 
-        // 남은 유저 저장
+        // 남은 카드 저장
         if (!batchArgs.isEmpty()) {
-            jdbcTemplate.batchUpdate("INSERT INTO users (email, nickname, password, user_role) VALUES (?, ?, ?, ?)", batchArgs);
+            jdbcTemplate.batchUpdate("INSERT INTO card (due, info, title, lists_id, rnk) VALUES (?, ?, ?, ?)", batchArgs);
         }
     }
 }

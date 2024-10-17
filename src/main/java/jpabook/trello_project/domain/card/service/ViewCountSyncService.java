@@ -10,12 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+import static jpabook.trello_project.domain.card.service.CardService.CARD_TOP_RANKINGS;
+
 @Service
 @RequiredArgsConstructor
 public class ViewCountSyncService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final CardRepository cardRepository;
+    private final CardService cardService;
 
     // 캐시에 있는 카드 조회수를 1분마다 db에 반영
     @Scheduled(fixedRate = 60000) // 1분마다 실행
@@ -29,10 +32,15 @@ public class ViewCountSyncService {
                 if (viewCountStr != null) {
                     Long viewCount = Long.parseLong(viewCountStr);
                     Card card = cardRepository.findById(cardId).orElse(null);
+                    // 디비에 조회수 반영
                     if (card != null) card.changeViewCount(viewCount);
+                    // zset 에 조회수 반영
+                    redisTemplate.opsForZSet()
+                            .add(CARD_TOP_RANKINGS, cardId.toString(), viewCount.doubleValue());
                 }
             }
         }
+        cardService.loadCardRankingFromDBToRedis();
     }
 
     private Long extractPostIdFromKey(String key) {

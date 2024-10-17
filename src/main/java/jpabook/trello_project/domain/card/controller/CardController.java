@@ -61,16 +61,16 @@ public class CardController {
                 .body(ResponseDto.of(200, responseDto));
     }
 
-    @GetMapping("/cards/top5")
-    public ResponseEntity<ResponseDto<List<CardRankResponseDto>>> getTop5(
-            @PathVariable("work_Id") Long workId,
-            @PathVariable("board_id") Long boardId,
-            @PathVariable("list_id") Long listId,
-            @AuthenticationPrincipal AuthUser authUser) {
-        List<CardRankResponseDto> responseDto = cardService.getTop5Cards(workId, boardId, listId);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ResponseDto.of(200, responseDto));
-    }
+//    @GetMapping("/cards/top5")
+//    public ResponseEntity<ResponseDto<List<CardRankResponseDto>>> getTop5(
+//            @PathVariable("work_Id") Long workId,
+//            @PathVariable("board_id") Long boardId,
+//            @PathVariable("list_id") Long listId,
+//            @AuthenticationPrincipal AuthUser authUser) {
+//        List<CardRankResponseDto> responseDto = cardService.getTop5Cards(workId, boardId, listId);
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(ResponseDto.of(200, responseDto));
+//    }
 
 
     /**
