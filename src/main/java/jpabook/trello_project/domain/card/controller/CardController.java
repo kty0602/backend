@@ -1,9 +1,10 @@
 package jpabook.trello_project.domain.card.controller;
 
-import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
-import jpabook.trello_project.domain.card.dto.response.GetCardResponseDto;
 import jpabook.trello_project.domain.card.dto.request.ModifyCardRequestDto;
+import jpabook.trello_project.domain.card.dto.response.CardRankResponseDto;
+import jpabook.trello_project.domain.card.dto.response.CardResponseDto;
+import jpabook.trello_project.domain.card.dto.response.GetCardResponseDto;
 import jpabook.trello_project.domain.card.service.CardService;
 import jpabook.trello_project.domain.common.dto.AuthUser;
 import jpabook.trello_project.domain.common.dto.ResponseDto;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,10 +56,22 @@ public class CardController {
             @PathVariable("list_id") Long listId,
             @PathVariable("card_id") Long cardId,
             @AuthenticationPrincipal AuthUser authUser) {
-        GetCardResponseDto responseDto = cardService.getCard(cardId, workId, authUser);
+        GetCardResponseDto responseDto = cardService.getCard(cardId, workId, boardId,listId, authUser);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ResponseDto.of(200, responseDto));
     }
+
+//    @GetMapping("/cards/top5")
+//    public ResponseEntity<ResponseDto<List<CardRankResponseDto>>> getTop5(
+//            @PathVariable("work_Id") Long workId,
+//            @PathVariable("board_id") Long boardId,
+//            @PathVariable("list_id") Long listId,
+//            @AuthenticationPrincipal AuthUser authUser) {
+//        List<CardRankResponseDto> responseDto = cardService.getTop5Cards(workId, boardId, listId);
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(ResponseDto.of(200, responseDto));
+//    }
+
 
     /**
      * @param boardId

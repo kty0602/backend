@@ -1,5 +1,6 @@
 package jpabook.trello_project.domain.card.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jpabook.trello_project.domain.attachment.dto.response.AttachmentResponseDto;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.manager.dto.response.GetManagerResopnseDto;
@@ -16,10 +17,12 @@ public class GetCardResponseDto {
     private Long id;
     private String title;
     private String info;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate due;
     private List<AttachmentResponseDto> attachmentList;
     private List<ReplyResponseDto> replyList;
     private List<GetManagerResopnseDto> managers;
+    private Long viewCount;
 
     public GetCardResponseDto(Card card) {
         this.id = card.getId();
@@ -35,6 +38,23 @@ public class GetCardResponseDto {
         this.managers = card.getManagers().stream()
                 .map(GetManagerResopnseDto::new)
                 .collect(Collectors.toList());
+        this.viewCount = card.getViewCount();
     }
 
+    public GetCardResponseDto(Card card, Long viewCount) {
+        this.id = card.getId();
+        this.title = card.getTitle();
+        this.info = card.getInfo();
+        this.due = card.getDue();
+        this.attachmentList = card.getAttachmentList().stream()
+                .map(AttachmentResponseDto::new)
+                .collect(Collectors.toList());
+        this.replyList = card.getReplyList().stream()
+                .map(ReplyResponseDto::new)
+                .collect(Collectors.toList());
+        this.managers = card.getManagers().stream()
+                .map(GetManagerResopnseDto::new)
+                .collect(Collectors.toList());
+        this.viewCount = viewCount;
+    }
 }

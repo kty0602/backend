@@ -1,5 +1,11 @@
 package jpabook.trello_project.domain.card.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.persistence.*;
 import jpabook.trello_project.domain.attachment.entity.Attachment;
 import jpabook.trello_project.domain.card.dto.request.CreateCardRequestDto;
@@ -28,6 +34,8 @@ public class Card {
     @Column(length = 100)
     private String info;
     @Column(length = 50)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate due;
     @Version
     private Long version;
@@ -40,6 +48,8 @@ public class Card {
     private List<Reply> replyList = new ArrayList<>();
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Manager> managers = new ArrayList<>();
+    private Long viewCount;
+    private int rnk;
 
     // lists 집어넣는거 아직 추가 안됨
     public Card(CreateCardRequestDto requestDto, Lists list) {
@@ -50,10 +60,13 @@ public class Card {
         this.attachmentList = new ArrayList<>();
         this.replyList = new ArrayList<>();
         this.managers = new ArrayList<>();
+        this.viewCount = 0L;
     }
 
     public void changeTitle(String title) { this.title = title; }
     public void changeInfo(String info) { this.info = info; }
     public void changeDue(LocalDate due) { this.due = due; }
-
+    public void plusViewCount() {this.viewCount ++;}
+    public void changeViewCount(Long viewCount) {
+        this.viewCount = viewCount;}
 }
