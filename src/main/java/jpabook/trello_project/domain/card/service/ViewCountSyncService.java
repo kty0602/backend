@@ -43,6 +43,13 @@ public class ViewCountSyncService {
         cardService.loadCardRankingFromDBToRedis();
     }
 
+    // 매일 자정에 조회수 초기화
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void resetCardViewCounts() {
+        cardRepository.resetAllViewCounts();
+    }
+
     private Long extractPostIdFromKey(String key) {
         return Long.parseLong(key.split(":")[2]);
     }

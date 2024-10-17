@@ -33,5 +33,9 @@ public interface CardRepository extends JpaRepository<Card, Long>, CardRepositor
     )
     void initRankings();
 
+    @Modifying
+    @Query("UPDATE Card c SET c.viewCount = 0")
+    void resetAllViewCounts();
+
     List<CardViewCount> findAllByOrderByViewCountDesc(Limit limit);
 }
