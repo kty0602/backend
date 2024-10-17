@@ -37,6 +37,8 @@ public class Card {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate due;
+    @Version
+    private Long version;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lists_id", nullable = false)
     private Lists list;
