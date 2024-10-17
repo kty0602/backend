@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/workspaces/{work_Id}/boards/{board_id}/lists/{list_id}/card/{card_id}")
+@RequestMapping("/workspaces/{work_Id}/boards/{board_id}/lists/{list_id}/cards/{card_id}")
 public class ReplyController {
     private final ReplyService replyService;
 
