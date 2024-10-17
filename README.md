@@ -63,13 +63,25 @@ Trello는 프로젝트 관리를 위한 협업 툴로, 직관적인 칸반 보�
 ### ✔️ Library
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
 
-## 와이어프레임
+## ✔️ 와이어프레임
 ![](https://github.com/SemiFinalPJ/backend/blob/dev/src/img/%EC%99%80%EC%9D%B4%EC%96%B4%20%ED%94%84%EB%A0%88%EC%9E%84.png)
 
-## API 명세서
+## ✔️ API 명세서
 | API 명세 | API 명세  | API 명세 | API 명세 |
 | :------------: | :------------: |:------------:|:------------:|
 |<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B81.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B82.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B83.png" width="300" height="200"/>|<img src="https://github.com/SemiFinalPJ/backend/blob/dev/src/img/api%20%EB%AA%85%EC%84%B84.png" width="300" height="200"/>|
 
-## ERD
+## ✔️ ERD
 ![](https://github.com/SemiFinalPJ/backend/blob/dev/src/img/ERD.png)
+
+## ✔️ Trouble Shooting
+강태영
+- 인덱스를 조회 속도가 가장 느린 조건에 설정했으나, 성능 개선이 크게 이뤄지지 않음, 성능 개선을 위해 상대적으로 덜 중복되는 title과 info필드를 인덱스로 지정함.
+김아름
+- 하나의 카드에 여러 스레드가 접근해 변경을 시도하는 테스트에서 낙관적 락을 사용하니 충돌이 너무 많아 계속 롤백하고 다시 시도하며 테스트가 끝나지 않는 이슈 발생. 최대 시도 횟수 정의한 후 초과시 종료하도록 함.
+정은교
+- Jmeter 테스트 진행 시, 여러개의 유저와 요청을 어떻게 설정해야되는지 문제가 있었으나, csv 파일로 여러 유저의 토큰과 여러 uri이 담긴 2개의 파일을 생성하여, Jmeter 상에서 환경변수를 설정하여 테스트를 진행함.
+황인서
+- 
+
+
