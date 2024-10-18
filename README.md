@@ -24,6 +24,8 @@ Trello는 프로젝트 관리를 위한 협업 툴로, 직관적인 칸반 보�
 
 ### [팀 노션](https://teamsparta.notion.site/14-fcb0547f0e6b41dab956f85ac8ee21d1)
 
+### [시연 영상](https://www.youtube.com/watch?v=hIpsRwO3Tro)
+
 ## 💜 주요기능
 
 - LOCK을 활용한 동시성 제어
