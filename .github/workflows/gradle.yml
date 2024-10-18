@@ -68,3 +68,23 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+    - name: Docker build
+      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -t app .
+        docker tag app ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
+
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ec2-user
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
+          docker stop $(docker ps -a -q)
+          docker run -d --log-driver=syslog -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
+          docker rm $(docker ps --filter 'status=exited' -a -q)
+          docker image prune -a -f
