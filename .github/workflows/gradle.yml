@@ -77,10 +77,10 @@ jobs:
         docker push ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
 
     - name: Deploy
-      uses: appleboy/ssh-action@master
+      uses: actions/checkout@v4
       with:
         host: ${{ secrets.HOST }}
-        username: ec2-user
+        username: ubuntu
         key: ${{ secrets.PRIVATE_KEY }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
