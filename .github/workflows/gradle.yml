@@ -80,7 +80,7 @@ jobs:
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
-        username: ec2-user
+        username: ubuntu
         key: ${{ secrets.PRIVATE_KEY }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/gomaoom:latest
