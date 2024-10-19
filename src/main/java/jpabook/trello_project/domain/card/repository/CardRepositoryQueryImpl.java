@@ -6,6 +6,7 @@ import jpabook.trello_project.domain.card.dto.CardSearchCondition;
 import jpabook.trello_project.domain.card.entity.Card;
 import jpabook.trello_project.domain.card.entity.QCard;
 import jpabook.trello_project.domain.manager.entity.QManager;
+import jpabook.trello_project.domain.user.entity.QUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,6 +24,7 @@ public class CardRepositoryQueryImpl implements CardRepositoryQuery {
     public Page<Card> findCardsByCondition(CardSearchCondition condition, Pageable pageable) {
         QCard card = QCard.card;
         QManager manager = QManager.manager;
+        QUser user = QUser.user;
 
         BooleanBuilder builder = new BooleanBuilder();
 
@@ -51,6 +53,7 @@ public class CardRepositoryQueryImpl implements CardRepositoryQuery {
         List<Card> results = queryFactory
                 .selectFrom(card)
                 .leftJoin(card.managers, manager).fetchJoin()
+                .leftJoin(manager.user, user).fetchJoin()
                 .where(builder)
                 .orderBy(card.id.desc())
                 .offset(pageable.getOffset())

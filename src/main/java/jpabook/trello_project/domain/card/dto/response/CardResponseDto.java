@@ -1,5 +1,6 @@
 package jpabook.trello_project.domain.card.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jpabook.trello_project.domain.card.entity.Card;
 import lombok.Getter;
 
@@ -11,6 +12,7 @@ public class CardResponseDto {
     private Long id;
     private String title;
     private String info;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate due;
 
     public CardResponseDto(Card card) {

@@ -48,6 +48,7 @@ public class ViewCountSyncService {
     @Transactional
     public void resetCardViewCounts() {
         cardRepository.resetAllViewCounts();
+        redisTemplate.getConnectionFactory().getConnection().serverCommands().flushAll();
     }
 
     private Long extractPostIdFromKey(String key) {
